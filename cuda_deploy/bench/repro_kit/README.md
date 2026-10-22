@@ -1,20 +1,36 @@
-# Repro kit — pinned inputs
+# Repro kit — pinned inputs and scripts
 
-Pinned prompts, seeds and input files for the measured rows in `../REPRODUCIBILITY.md`, plus
-`MANIFEST.sha256` so every input can be verified before a run.
+Everything needed to re-measure the rows in `../results/` on your own GPU, driven only through the
+installed `veizik` CLI. The guide is [`../REPRODUCIBILITY.md`](../REPRODUCIBILITY.md).
 
 ```
 repro_kit/
-  MANIFEST.sha256     # sha256 of every input in this kit
-  prompts/            # exact prompt text, one file per row
-  inputs/             # image/latent/mask inputs where a row needs them
-  run/                # the exact command per row
+  README.md           this file
+  SHA256SUMS          sha256 of every prompt file (bench_grid.sh enforces it)
+  MANIFEST.sha256     sha256 of the kit files
+  prompts/
+    fact_chatml.txt   the pinned prompt: a ChatML user turn, no trailing newline (21 prompt tokens)
+  run/
+    bench_grid.sh     runs the grid through `veizik run`; writes one log per run
+    extract_rows.py   turns the logs into *_bench.txt and *_rows.json
 ```
 
 Verify before reproducing:
+
 ```bash
-sha256sum -c MANIFEST.sha256
+( cd prompts && sha256sum -c ../SHA256SUMS )     # the prompt
+sha256sum -c MANIFEST.sha256                      # the kit files
 ```
 
-Populated per release from the measurement run on the shipped bytes. A kit is only valid for the
-package SHA it was produced against — see `../../RELEASE_NOTES.md`.
+Run (Linux, package installed and activated, checkpoints in one folder):
+
+```bash
+VZ_WEIGHTS_ROOT=/data/models bash run/bench_grid.sh ./raw_mygpu
+python3 -I run/extract_rows.py --raw ./raw_mygpu --gpu "RTX 4090" --arch sm_89 \
+    --measured-at "$(date +%F) (veizik-cuda 1.0.0, tar 20681397)" --prov "my reproduction" \
+    --bench-txt my_bench.txt --rows-json my_rows.json
+```
+
+The committed rows are valid for the build named in their `measured_at` and `prov` fields (see
+[`../../RELEASE_NOTES.md`](../../RELEASE_NOTES.md) for the shipped package). A kit run on a different
+package SHA-256 is a different engine: compare it by method, not by value.
