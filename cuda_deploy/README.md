@@ -4,17 +4,18 @@ This folder holds the support documentation for both NVIDIA / Linux packages in 
 
 | package | release | guide | release notes |
 |---|---|---|---|
-| Qwen3.5 / Qwen3.6 language models — `veizik-qwen-cuda-1.0.0-linux-x86_64.tar` | `v1.0.0` | this file, [`CLI_USAGE.md`](CLI_USAGE.md), [`USAGE_GUIDE.md`](USAGE_GUIDE.md), [`bench/REPRODUCIBILITY.md`](bench/REPRODUCIBILITY.md) | [`RELEASE_NOTES.md`](RELEASE_NOTES.md) |
+| Qwen3.5 / Qwen3.6 language models — `veizik-qwen-cuda-1.1.0-linux-x86_64.tar` | `v1.1.0` | this file, [`CLI_USAGE.md`](CLI_USAGE.md), [`USAGE_GUIDE.md`](USAGE_GUIDE.md), [`bench/REPRODUCIBILITY.md`](bench/REPRODUCIBILITY.md) | [`RELEASE_NOTES.md`](RELEASE_NOTES.md) |
 | Wan2.1 / Wan2.2 video models — `veizik-wan-1.2.0-linux-x86_64.tar` | `v1.2.0` | [`wan/README.md`](wan/README.md) | [`wan/RELEASE_NOTES.md`](wan/RELEASE_NOTES.md) |
 
 The rest of this file covers the Qwen package.
 
-## veizik-cuda 1.0.0 (Qwen3.5 / Qwen3.6)
+## veizik-cuda 1.1.0 (Qwen3.5 / Qwen3.6)
 
 Veizik runs the Qwen3.5 (0.8B, 2B, 4B, 9B) and Qwen3.6-35B-A3B language models **on your own NVIDIA
 GPU** through its own native engine: per-architecture native CUDA code, no Python runtime,
 no CUDA toolkit, no cloud at inference time. `veizik serve` provides a local OpenAI-compatible HTTP
-server (chat completions, text completions, streaming). This folder is the authoritative support
+server (chat completions, text completions, streaming). On Qwen3.6-35B-A3B, `veizik run` also takes
+one image or one video (a folder of frames) with the text prompt (§4a). This folder is the authoritative support
 documentation for the shipped CUDA Qwen package — install, activation, every CLI command, serving
 over HTTP, and a reproducible benchmark set.
 
@@ -28,14 +29,14 @@ over HTTP, and a reproducible benchmark set.
 
 | Item | Value |
 |---|---|
-| Product | `veizik-cuda 1.0.0 (Qwen3.5 / Qwen3.6)` |
-| Package | `veizik-qwen-cuda-1.0.0-linux-x86_64.tar` |
-| Package SHA-256 | `9deb3497b23f233a9bfabbff2dd1bfb10a60b316a5a361010f5ce41b40b880dd` (short form `9deb3497`) |
-| Replaces | the withdrawn tarball `20681397…` (same file name). Only the launcher that opens the sealed engine changed: it was rebuilt with loader hardening. The engine and the GPU code are unchanged |
+| Product | `veizik-cuda 1.1.0 (Qwen3.5 / Qwen3.6)` |
+| Package | `veizik-qwen-cuda-1.1.0-linux-x86_64.tar` (58,570,240 B) |
+| Package SHA-256 | `4358658784da453028a916d81379c117bb07691224a3ee3df828bce154ec9907` (short form `43586587`) |
+| Supersedes | `veizik-cuda 1.0.0`. 1.1.0 adds image and video input on Qwen3.6-35B-A3B; the five text models are unchanged |
 | CLI version (`veizik version`) | `1.2.0` — CLI build `9b000b81` (x86_64); the tarball's aarch64 CLI is build `af92fd50` but the engine is x86-64 only |
 | Backend | `CUDA` (native kernels, one set per GPU architecture) |
-| Signing | engine files integrity-sealed and checked at every start; the release catalogue is signed with Veizik's production code-signing key and can be verified with the bundled public key |
-| GPU architectures | `sm_80` / `sm_86` / `sm_89` / `sm_90a` / `sm_100a` / `sm_120a` — GPU code ships as per-architecture cubin (SASS); the loader does no JIT |
+| Signing | engine files integrity-sealed and checked at every start |
+| GPU architectures | `sm_80` / `sm_86` / `sm_89` / `sm_90a` / `sm_100a` / `sm_120a` — GPU code ships as per-architecture cubin (SASS); the loader does no JIT. The image and video stage ships GPU code for `sm_86`, `sm_89` and `sm_120a` |
 | Model weights | **not included** — you download the public checkpoints (§2, "Model weights") |
 
 Shipped models (pass the **model key** to the CLI):
@@ -46,7 +47,7 @@ Shipped models (pass the **model key** to the CLI):
 | `qwen35_2b` | Qwen3.5-2B | `Qwen/Qwen3.5-2B` | |
 | `qwen35_4b` | Qwen3.5-4B | `Qwen/Qwen3.5-4B` | |
 | `qwen35_9b` | Qwen3.5-9B | `Qwen/Qwen3.5-9B` | |
-| `qwen36_35b_a3b` | Qwen3.6-35B-A3B | `Qwen/Qwen3.6-35B-A3B` | mixture of experts, 35B total / about 3B active per token |
+| `qwen36_35b_a3b` | Qwen3.6-35B-A3B | `Qwen/Qwen3.6-35B-A3B` | mixture of experts, 35B total / about 3B active per token; image and video input on `veizik run` |
 
 **Weights are yours.** The package contains the engine, not the models. You point Veizik at a
 checkpoint you already have the right to use; several upstream checkpoints are released under their
@@ -58,7 +59,7 @@ on its own). `veizik serve <model>` answers `POST /v1/chat/completions` (with st
 and any OpenAI-compatible client, next to `POST /v1/completions` and `GET /v1/models`.
 
 **Not in this release:** downloading weights with `veizik pull`, a weight converter, LoRA adapters,
-image or other multimodal input, tool/function calling over HTTP, and usage-ledger / per-tenant quota
+image or video input on the four Qwen3.5 models or through `chat` / `serve`, audio input, tool/function calling over HTTP, and usage-ledger / per-tenant quota
 enforcement on the CUDA server (an API key is supported: `serve --require-auth`). Each is stated
 where it matters in
 [`CLI_USAGE.md`](CLI_USAGE.md) and [`USAGE_GUIDE.md`](USAGE_GUIDE.md).
@@ -69,9 +70,9 @@ where it matters in
 
 1. Verify the tarball, then unpack it:
    ```bash
-   echo "9deb3497b23f233a9bfabbff2dd1bfb10a60b316a5a361010f5ce41b40b880dd  veizik-qwen-cuda-1.0.0-linux-x86_64.tar" | sha256sum -c -
-   # must print: veizik-qwen-cuda-1.0.0-linux-x86_64.tar: OK
-   tar xf veizik-qwen-cuda-1.0.0-linux-x86_64.tar
+   echo "4358658784da453028a916d81379c117bb07691224a3ee3df828bce154ec9907  veizik-qwen-cuda-1.1.0-linux-x86_64.tar" | sha256sum -c -
+   # must print: veizik-qwen-cuda-1.1.0-linux-x86_64.tar: OK
+   tar xf veizik-qwen-cuda-1.1.0-linux-x86_64.tar
    cd veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86
    ```
    The folder name is fixed by the release identity that activation uses — do not rename it. It
@@ -197,7 +198,7 @@ printf '%s' "$CLI_PASSWORD" | veizik activate --key vzek_… --password-stdin
 ## 4. Quick start
 
 ```bash
-# one-shot generation (greedy by default); the output is written to ~/veizik-out/gen.txt
+# one-shot generation (greedy by default); the output is written to gen.txt in ~/veizik-out
 veizik run qwen35_2b "The capital of France is" --tokens 32
 
 # a larger model, a named mode, a prompt from a file, a chosen output folder
@@ -219,10 +220,21 @@ veizik bench qwen35_9b
 veizik chat qwen35_2b
 ```
 
-`run` writes the generated text to `gen.txt`; the engine detokenizes (the package's own
-`INTERFACE.json`: "generated text, detokenized by the engine"). If a `gen.txt` holds
-whitespace-separated numbers instead, they are token ids: decode them with the checkpoint's tokenizer
-([`USAGE_GUIDE.md`](USAGE_GUIDE.md) §1). `serve` and `veizik chat` return text. The complete
+### 4a. Image and video input (Qwen3.6-35B-A3B only)
+
+```bash
+# one image (PNG or JPEG) with a text prompt; photo.png stands for your own file
+veizik run qwen36_35b_a3b --image photo.png --prompt "What is in this picture?" --out ./out
+
+# one video: a folder of 2–256 PNG or JPEG frames, all the same size, in file-name order
+veizik run qwen36_35b_a3b --video ./frames --video-fps 2 --prompt-file question.txt --out ./out
+```
+
+Each run takes exactly one image or one video, never both, and always with `--prompt` or
+`--prompt-file`. The chat template is applied and the answer ends at the end-of-turn token. Details,
+limits and exit codes: [`USAGE_GUIDE.md`](USAGE_GUIDE.md) §1a.
+
+`veizik run` writes its output to `gen.txt` in `--out`; for text use `veizik chat` or `veizik serve`. The complete
 command reference — every verb, every flag, with examples — is in **[`CLI_USAGE.md`](CLI_USAGE.md)**.
 
 ---
@@ -240,10 +252,9 @@ Veizik publishes its own measured figures only. The decode board for this packag
 | Qwen3.5-9B | 190 | 347 | 499 |
 | Qwen3.6-35B-A3B | — | — | 450 (`fast`: 545) |
 
-These rows are **previous-version rows**: they were measured on the previous build (the LLM-only
-1.0.0 build of this package, 2026-10-21) and were not re-measured on tar `9deb3497` (nor on the
-withdrawn `20681397`); the GPU code is the same per-architecture set, and this tarball changes only
-the launcher that opens the sealed engine. Each figure names its GPU, mode, operating point and run count; none
+These rows are **previous-version rows**: they were measured on 1.0.0 builds of this package
+(2026-10-21), with text input, and were not re-measured on 1.1.0. No figure is published for image or
+video input. Each figure names its GPU, mode, operating point and run count; none
 is projected. `quality` mode, per-run values, spread, resident memory and 1,024-token runs are in the
 data files.
 

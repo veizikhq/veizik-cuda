@@ -27,7 +27,7 @@ Run (Linux, package installed and activated, checkpoints in one folder):
 ```bash
 VZ_WEIGHTS_ROOT=/data/models bash run/bench_grid.sh ./raw_mygpu
 python3 -I run/extract_rows.py --raw ./raw_mygpu --gpu "RTX 4090" --arch sm_89 \
-    --measured-at "$(date +%F) (veizik-cuda 1.0.0, tar 9deb3497)" --prov "my reproduction" \
+    --measured-at "$(date +%F) (veizik-cuda 1.1.0, tar 43586587)" --prov "my reproduction" \
     --bench-txt my_bench.txt --rows-json my_rows.json
 ```
 

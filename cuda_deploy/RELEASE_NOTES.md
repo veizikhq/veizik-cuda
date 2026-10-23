@@ -1,30 +1,49 @@
-# veizik-cuda 1.0.0 — Qwen3.5 / Qwen3.6 on NVIDIA GPUs, with a local OpenAI-compatible server
+# veizik-cuda 1.1.0 — Qwen3.5 / Qwen3.6 on NVIDIA GPUs, with image and video input on Qwen3.6-35B-A3B
 
 **Qwen3.5 (0.8B, 2B, 4B, 9B) and Qwen3.6-35B-A3B on your own NVIDIA GPU, on-device.** Veizik runs
 the models through its own native CUDA engine — no Python runtime, no CUDA toolkit, no cloud at
 inference time. You supply the weights; nothing leaves the machine.
 
-- Package: `veizik-qwen-cuda-1.0.0-linux-x86_64.tar`  ·  SHA-256 `9deb3497b23f233a9bfabbff2dd1bfb10a60b316a5a361010f5ce41b40b880dd`  ·  CLI `1.2.0` (x86_64 build `9b000b81`, aarch64 build `af92fd50`)  ·  backend CUDA
+- Package: `veizik-qwen-cuda-1.1.0-linux-x86_64.tar`  ·  SHA-256 `4358658784da453028a916d81379c117bb07691224a3ee3df828bce154ec9907`  ·  58,570,240 B  ·  CLI `1.2.0` (x86_64 build `9b000b81`, aarch64 build `af92fd50`)  ·  backend CUDA
 - Supported: `qwen35_0p8b`, `qwen35_2b`, `qwen35_4b`, `qwen35_9b`, `qwen36_35b_a3b`  ·  Hardware: NVIDIA compute capability 8.0+ — `sm_80` / `sm_86` / `sm_89` / `sm_90a` / `sm_100a` / `sm_120a`
 - GPU code ships as per-architecture **cubin (SASS)**; the loader does no JIT
-- Install: `echo "9deb3497b23f233a9bfabbff2dd1bfb10a60b316a5a361010f5ce41b40b880dd  veizik-qwen-cuda-1.0.0-linux-x86_64.tar" | sha256sum -c - && tar xf veizik-qwen-cuda-1.0.0-linux-x86_64.tar && cd veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86 && ./install.sh`   (full guide: [README](README.md))
+- Install: `echo "4358658784da453028a916d81379c117bb07691224a3ee3df828bce154ec9907  veizik-qwen-cuda-1.1.0-linux-x86_64.tar" | sha256sum -c - && tar xf veizik-qwen-cuda-1.1.0-linux-x86_64.tar && cd veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86 && ./install.sh`   (full guide: [README](README.md))
 - Benchmarks: Veizik's own measured figures — [bench/REPRODUCIBILITY.md](bench/REPRODUCIBILITY.md)  (reproduce: [bench/repro_kit/](bench/repro_kit/))
 - Licence: install + evaluation free; production use licensed. Terms: Veizik Terms of Service, "License & entitlement" (https://veizik.com/terms), and the Veizik distribution licence ([`LICENSE`](../LICENSE)) with the third-party notices ([`NOTICE.md`](../NOTICE.md)) at the root of this repository ([README](README.md) §6).
-- Replaces: the withdrawn tarball `20681397a43d3a9093aa25517a1e61bc594d0a4df2a1a583189d914bf3d58c55` (same file name). Delete it and download again.
+- Supersedes: `veizik-cuda 1.0.0`.
 
-## Changed in this tarball (9deb3497, replaces the withdrawn 20681397)
+## 1.1.0 — Added
 
-- The launcher that opens the sealed engine was rebuilt with loader hardening against unprivileged
-  extraction of the GPU code: it re-executes itself in a clean environment before it opens the GPU
-  code, and checks its own integrity at run time — runtime anti-tamper aborts naive binary patches
-  (a determined on-disk patch remains a known residual). The device key never leaves the device.
-  Nothing you type or see changes.
-- The engine and the per-architecture GPU code are byte-for-byte those of `20681397`, so its
-  benchmark rows carry unchanged (they remain previous-version rows; see below).
-- The activation flow, the model catalogue, the `veizik` command (CLI `1.2.0`) and the folder name
-  are unchanged.
+- **Image input on Qwen3.6-35B-A3B:** `veizik run qwen36_35b_a3b --image FILE --prompt …` — one PNG or
+  JPEG per run, with `--prompt` or `--prompt-file`. The chat template is applied and the answer ends at
+  the end-of-turn token. `--image-max-pixels N` (default 1,048,576) bounds the pixel count after
+  resizing; a larger image is scaled down to fit.
+- **Video input on Qwen3.6-35B-A3B:** `veizik run qwen36_35b_a3b --video DIR --prompt …` — a folder of
+  2 to 256 PNG or JPEG frames, all the same size, in file-name order; one video per run, not together
+  with `--image`. `--video-fps X` (default 2) sets the time stamps between frames;
+  `--video-max-pixels N` (default 262,144) bounds every frame's pixel count after resizing.
+- GPU code for the image and video stage for `sm_86`, `sm_89` and `sm_120a`. On a GPU the stage does
+  not support, an image or video run stops with exit 2.
+- New exit-code meanings for image and video runs: `2` for an unusable request or input (wrong model,
+  more than one input, no text prompt, an unsupported or damaged file, frames of different sizes or
+  outside 2–256, over the size or aspect-ratio budget, or an unsupported GPU); `3` for an image file
+  or frames folder that is missing or unreadable.
 
-## Added
+## 1.1.0 — Unchanged
+
+- The five text models, their modes, `veizik chat`, `veizik serve` (text only) and the `veizik`
+  command (CLI `1.2.0`, x86_64 build `9b000b81`). Activation works as in 1.0.0.
+- Image and video input is not available through `veizik chat` or `veizik serve`, nor on the four
+  Qwen3.5 models.
+
+## History
+
+- 1.0.0 (2026-10-23): first CUDA Qwen package. It was re-issued once with a hardened loader as
+  `9deb3497…`, replacing the withdrawn `20681397…`; engine and GPU code were unchanged by that re-issue.
+
+The sections below describe 1.0.0; everything in them still applies to 1.1.0.
+
+## 1.0.0 — Added
 
 - `veizik serve <model>`: a resident, batched, OpenAI-compatible HTTP server on `127.0.0.1` —
   `POST /v1/chat/completions`, `POST /v1/completions`, `GET /v1/models`, server-sent-event streaming
@@ -49,7 +68,7 @@ inference time. You supply the weights; nothing leaves the machine.
 - A reproducibility kit and committed results: pinned prompt and SHA manifest, the grid and
   extraction scripts, and per-GPU rows for RTX 3090, RTX 4090 and RTX 5090.
 
-## Changed
+## 1.0.0 — Changed
 
 - GPU modules ship as per-architecture cubin for every supported architecture, including the
   consumer ones. Earlier internal builds shipped PTX text for some consumer architectures; that form
@@ -69,9 +88,8 @@ inference time. You supply the weights; nothing leaves the machine.
   `keys`, `usage`, `audit` and `quota` are local CLI tools that the CUDA server does not read.
 - **Stopping a detached server:** `veizik stop` does not see the CUDA server. If you started it in
   the background, stop it by signalling the engine process (find it with `ss -ltnp` on the port).
-- **`run` output.** `gen.txt` holds the generated text; the engine detokenizes (per the package's
-  `INTERFACE.json`). If it holds whitespace-separated numbers instead, they are token ids: decode them
-  with the tokenizer of the checkpoint you supplied. `serve` and `veizik chat` return text.
+- **`run` output.** `veizik run` writes its output to `gen.txt` in `--out`; for text use `veizik chat`
+  or `veizik serve`.
 - **Chat sessions.** `veizik chat` is an interactive terminal session for all five models; each
   message is answered on its own (the CLI session keeps no conversation history between messages).
   `veizik serve` with `POST /v1/chat/completions` is the programmatic chat path; both return text.
@@ -90,12 +108,12 @@ inference time. You supply the weights; nothing leaves the machine.
   decoding is the verified path.
 - **Server context window:** 4,096 tokens per request (prompt plus generated) in the validated
   configuration.
-- **Benchmark rows are previous-version rows.** They were measured on the previous build (the
-  LLM-only 1.0.0 build, 2026-10-21) with the same per-architecture GPU code, and were not re-measured
-  on this tarball (`9deb3497`) or on the withdrawn `20681397`. Server throughput over HTTP is not published.
+- **Benchmark rows were measured on 1.0.0 builds** (2026-10-21, text input) and were not re-measured
+  on 1.1.0. No figure is published for image or video input. Server throughput over HTTP is not published.
 - **Architectures:** `sm_80`, `sm_90a` and `sm_100a` GPU code is included but was not run in
   validation.
 - **WSL is not supported** for the sealed engine; use a native Linux host. The tarball also contains
   an aarch64 CLI binary, but the engine is x86-64 only, so the package installs on Linux x86-64 only.
-- **Not in this release:** LoRA adapters, image or other multimodal input, tool/function calling,
+- **Not in this release:** LoRA adapters, image or video input on the Qwen3.5 models or through
+  `chat` / `serve`, audio input, tool/function calling,
   `logprobs` and embeddings over HTTP, a weight converter, downloading weights with `veizik pull`.

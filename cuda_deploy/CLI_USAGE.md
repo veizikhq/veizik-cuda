@@ -1,4 +1,4 @@
-# veizik CLI — Complete Command Reference (CUDA / Linux, veizik-cuda 1.0.0, CLI 1.2.0)
+# veizik CLI — Complete Command Reference (CUDA / Linux, veizik-cuda 1.1.0, CLI 1.2.0)
 
 Every command the shipped `veizik` binary of this package accepts, its flags, exit codes and a worked
 example. Flags and behavior below are taken from the source of the shipped CLI build (`9b000b81`) and
@@ -46,8 +46,8 @@ veizik <command> [arguments]
 |---|---|
 | `0` | success |
 | `1` | `run`/`serve`: the engine failed, or finished without confirming the configuration it ran in (the result is not what you asked for); `status`: the lease is in its renewal grace period |
-| `2` | usage error: no args, unknown command, unknown or invalid option, missing or blank argument, out-of-range value, unknown model or mode; for `run`/`serve` also: the engine refused the model configuration, or the GPU generation could not be read (set `Q35_SEAL_ARCH`) |
-| `3` | an input is missing or unreadable: model weights, tokenizer, prompt file, or the output folder cannot be created |
+| `2` | usage error: no args, unknown command, unknown or invalid option, missing or blank argument, out-of-range value, unknown model or mode; for `run`/`serve` also: the engine refused the model configuration, or the GPU generation could not be read (set `Q35_SEAL_ARCH`); image or video input that cannot be used (wrong model, more than one image or video, `--image` with `--video`, no text prompt, an unsupported or damaged file, frames of different sizes or fewer than 2 / more than 256, over the size or aspect-ratio budget, or a GPU the image or video stage does not support) |
+| `3` | an input is missing or unreadable: model weights, tokenizer, prompt file, the image file, the video frames folder, or the output folder cannot be created |
 | `4` | model not found, or not usable for the command; `status`: not activated or expired; `run`/`serve`: the engine could not start because its integrity check failed (a file was changed, added or removed — reinstall) or its GPU modules did not open |
 | `5` | the CLI binary failed its own integrity check; `activate --refresh` could not renew |
 | `6` | no engine found at the install root, cannot write, the activation service refused, or activation was not confirmed |
@@ -67,6 +67,7 @@ find the model" or "the engine could not start"; the message printed before it s
 ```
 veizik run <model> "<prompt>" [options]
 veizik run <model> --prompt TEXT | --prompt-file FILE [options]
+veizik run qwen36_35b_a3b --image FILE | --video DIR (--prompt TEXT | --prompt-file FILE) [options]
 ```
 
 - `<model>` — one of the five model keys: `qwen35_0p8b`, `qwen35_2b`, `qwen35_4b`, `qwen35_9b`,
@@ -95,6 +96,11 @@ veizik run <model> --prompt TEXT | --prompt-file FILE [options]
 | `--top-p X` | 0 – 1 | — | nucleus threshold — **experimental** |
 | `--top-k N` | 0 – 1000 | — | top-k — **experimental** |
 | `--seed N` | 0 – 2147483647 | — | sampling seed — **experimental** |
+| `--image FILE` | PNG or JPEG | — | `qwen36_35b_a3b` only: an image the model looks at; exactly one per run; needs `--prompt` or `--prompt-file`; applies the chat template (the answer ends at the end-of-turn token). `--image-file` is the same option |
+| `--image-max-pixels N` | 65536 – 16777216 | `1048576` | upper bound on the image's pixel count after resizing; a larger image is scaled down to fit. More pixels keep more detail and use more memory and time. Needs `--image` |
+| `--video DIR` | folder of PNG or JPEG frames | — | `qwen36_35b_a3b` only: 2 to 256 frames, all the same size, in file-name order (= time order); exactly one video per run; needs `--prompt` or `--prompt-file`; not with `--image`; applies the chat template (the answer ends at the end-of-turn token) |
+| `--video-fps X` | 0.001 – 1000 | `2` | frame rate of the frames in the `--video` folder; it sets the time stamps the model sees between frames. Needs `--video` |
+| `--video-max-pixels N` | 65536 – 16777216 | `262144` | upper bound on every frame's pixel count after resizing; larger frames are scaled down to fit. More pixels keep more detail and use more memory and context. Needs `--video` |
 
 **Where the weights are looked for**, in this order, stopping at the first complete checkpoint:
 
@@ -119,11 +125,7 @@ lists where it looked and exits 3.
 | `qwen35_9b` | `Qwen3.5-9B` | `Qwen/Qwen3.5-9B` |
 | `qwen36_35b_a3b` | `Qwen3.6-35B-A3B` | `Qwen/Qwen3.6-35B-A3B` |
 
-**Output.** `gen.txt` in the output folder holds the generated **text**; the engine detokenizes (the
-package's `INTERFACE.json`: "generated text, detokenized by the engine"). If a `gen.txt` holds
-whitespace-separated numbers instead, they are token ids: decode them with the tokenizer of the
-checkpoint you supplied (snippet in [`USAGE_GUIDE.md`](USAGE_GUIDE.md) §1). `serve` and `veizik chat`
-also return text.
+**Output.** `veizik run` writes its output to `gen.txt` in `--out`; for text use `veizik chat` or `veizik serve`.
 `run` prints `output: <folder>` when it finishes; progress
 lines from the launcher (`veizik-run: …`) go to the terminal. In validation every one-shot run
 produced exactly the number of tokens requested; it does not stop early at the end-of-turn token, so
@@ -133,6 +135,9 @@ If the device lease is missing or within 3 days of expiring and this machine is 
 `run` first renews it without a browser and says so.
 
 ```bash
+# image input (Qwen3.6-35B-A3B only); photo.png stands for your own PNG or JPEG
+veizik run qwen36_35b_a3b --image photo.png --prompt "What is in this picture?" --out ./out
+
 # chat-formatted prompt, 64 tokens
 P=$(printf '<|im_start|>user\nWhat is the capital of France? Answer in one short sentence.<|im_end|>\n<|im_start|>assistant')
 VZ_WEIGHTS=/data/models veizik run qwen35_2b "$P" --tokens 64 --out ./out
@@ -505,7 +510,7 @@ veizik version        # veizik 1.2.0 · runtime native · backend CUDA
 ```
 
 Also `--version`, `-v`, `-V`. The CLI version is numbered separately from the package version
-(`1.0.0`).
+(`1.1.0`).
 
 ---
 
@@ -653,7 +658,7 @@ veizik version                                  # CLI version + backend
 export VZ_WEIGHTS=/data/models                  # folder holding Qwen3.5-0.8B/, Qwen3.5-9B/, …
 veizik activate                                 # register this device (once; needs the 0.8B weights)
 veizik status                                   # activation, expiry
-veizik run qwen35_9b "…" --mode balanced        # generate once; text in ~/veizik-out/gen.txt
+veizik run qwen35_9b "…" --mode balanced        # generate once; output in ~/veizik-out/gen.txt
 veizik chat qwen35_2b                           # interactive session in the terminal (/exit leaves)
 veizik serve qwen35_2b --weights $VZ_WEIGHTS/Qwen3.5-2B   # OpenAI-compatible server on 127.0.0.1:8000
 veizik bench qwen35_9b                          # time this machine (3 end-to-end runs)

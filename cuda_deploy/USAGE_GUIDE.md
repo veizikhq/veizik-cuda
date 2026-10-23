@@ -1,4 +1,4 @@
-# veizik-cuda 1.0.0 (Qwen3.5 / Qwen3.6) — Detailed Usage Guide
+# veizik-cuda 1.1.0 (Qwen3.5 / Qwen3.6) — Detailed Usage Guide
 
 Goes beyond the command reference ([`CLI_USAGE.md`](CLI_USAGE.md)): how the run modes actually
 behave, serving over HTTP, long-context prompts, sampling, performance, and troubleshooting. Every
@@ -11,7 +11,7 @@ release the text says so.
 
 | mode | command | use it for | streaming | concurrency |
 |---|---|---|---|---|
-| one-shot | `veizik run <model> "<prompt>"` | scripts, single generations | no — the generated text is written to `gen.txt` when the run finishes | one generation per process |
+| one-shot | `veizik run <model> "<prompt>"` | scripts, single generations | no — the output is written to `gen.txt` when the run finishes | one generation per process |
 | interactive | `veizik chat <model>` | talking to a model in the terminal: type a message, read the text reply, repeat (each message is answered on its own; no history is kept between messages) | — | — |
 | HTTP server | `veizik serve <model>` | chat and text completions for applications and OpenAI-compatible clients (`POST /v1/chat/completions`) | **yes** — server-sent events (§2) | batched across a fixed number of slots (§2) |
 
@@ -23,17 +23,7 @@ Each `run` loads the model, generates and exits, so model load time is paid on e
 always runs the `balanced` configuration. `bench` runs `balanced`. An unknown mode is an error
 (exit 2), never a silent substitution.
 
-**Reading `gen.txt`.** A one-shot run writes the generated **text** to `<out>/gen.txt`; the engine
-detokenizes (the package's `INTERFACE.json`: "generated text, detokenized by the engine"). If a
-`gen.txt` holds whitespace-separated numbers instead, they are token ids; decode them with the
-tokenizer of the checkpoint you supplied, for example:
-
-```python
-from tokenizers import Tokenizer          # pip install tokenizers
-tk = Tokenizer.from_file("/data/models/Qwen3.5-2B/tokenizer.json")
-ids = [int(x) for x in open("out/gen.txt").read().split()]
-print(tk.decode(ids))
-```
+**Output.** `veizik run` writes its output to `gen.txt` in `--out`; for text use `veizik chat` or `veizik serve`.
 
 **Chatting in the terminal.** `veizik chat <model>` opens an interactive prompt: type a message, read
 the model's text reply, repeat; `/help` lists the in-session commands and `/exit` leaves. Each message
@@ -49,9 +39,49 @@ P=$(printf '<|im_start|>user\nExplain attention in two sentences.<|im_end|>\n<|i
 veizik run qwen35_4b "$P" --tokens 96 --out ./out
 ```
 
-In validation every one-shot run produced exactly the number of tokens requested; it does not stop
-at the end-of-turn token. Trim the text at `<|im_end|>`. The chat endpoint of `serve` applies the
-chat template for you and stops at end-of-sequence.
+In validation every one-shot text run produced exactly the number of tokens requested; it does not
+stop at the end-of-turn token. Trim the output at `<|im_end|>`. The chat endpoint of `serve` applies
+the chat template for you and stops at end-of-sequence. Image and video runs (§1a) apply the chat
+template themselves and end at the end-of-turn token.
+
+---
+
+## 1a. Image and video input (Qwen3.6-35B-A3B only)
+
+New in 1.1.0. `veizik run qwen36_35b_a3b` can look at one image or one short video together with a
+text prompt. The other four models take text only, and `veizik chat` and `veizik serve` take text only
+(`serve` answers an image or other non-text message part with 400 `unsupported_content_part`).
+
+```bash
+# one image; photo.png stands for your own PNG or JPEG file
+veizik run qwen36_35b_a3b --image photo.png --prompt "What is in this picture?" --out ./out
+
+# one video: a folder of PNG or JPEG frames, all the same size; file-name order is time order
+veizik run qwen36_35b_a3b --video ./frames --video-fps 2 --prompt-file question.txt --out ./out
+```
+
+| option | default | meaning |
+|---|---|---|
+| `--image FILE` (`--image-file`) | — | a PNG or JPEG file; exactly one image per run |
+| `--image-max-pixels N` | 1,048,576 | upper bound on the image's pixel count after resizing (65,536 – 16,777,216); a larger image is scaled down to fit. More pixels keep more detail and use more memory and time |
+| `--video DIR` | — | a folder of 2 to 256 PNG or JPEG frames, all the same size, in file-name order; exactly one video per run |
+| `--video-fps X` | 2 | the frame rate of the frames in the folder (0.001 – 1000); it sets the time stamps the model sees between frames |
+| `--video-max-pixels N` | 262,144 | upper bound on every frame's pixel count after resizing (65,536 – 16,777,216); more pixels keep more detail and use more memory and context |
+
+Rules:
+
+- One image **or** one video per run, never both, and always with `--prompt` or `--prompt-file`.
+- The chat template is applied for you, and the answer ends at the end-of-turn token.
+- To keep frame names in time order, number them with leading zeros (`0001.png`, `0002.png`, …).
+- The image and video stage ships GPU code for `sm_86`, `sm_89` and `sm_120a`. On a GPU the stage does
+  not support, the run stops with exit 2.
+- Images and frames add to memory use on top of the model's ≈ 21.7 GiB resident text footprint. No
+  memory or speed figure is published for image or video input in this release.
+
+| exit | meaning for image / video runs |
+|---|---|
+| `2` | `--image` or `--video` on a model that does not take it; more than one image or video; `--image` with `--video`; no text prompt; an unsupported or damaged file; frames of different sizes, or fewer than 2 / more than 256 frames; over the size or aspect-ratio budget; or a GPU the stage does not support |
+| `3` | the image file or the video frames folder is missing or unreadable |
 
 ---
 
@@ -325,7 +355,7 @@ What you can do:
 | `quality … does not fit this N MiB GPU; using balanced` | 35B-A3B `quality` needs about 26 GB or more | accept `balanced`, or use a larger card |
 | CUDA out-of-memory | the model, mode and context do not fit | use a smaller model or `--mode low-memory`; close other GPU programs |
 | `run` / `serve` exits `1` after the engine finished | the engine could not confirm the configuration it ran in; the result is not what you asked for | re-run; report it if it repeats |
-| `gen.txt` is a list of numbers | those are token ids, not text | read text with `serve` or `veizik chat`, or decode the ids with the checkpoint's tokenizer (§1) |
+| exit `2` on an `--image` / `--video` run | wrong model, more than one input, no text prompt, an unusable file or frame set, or a GPU the image / video stage does not support | see §1a |
 | `veizik pull` says it "cannot fetch weights for this package" | `pull` has no source for this package's checkpoints | download the Hugging Face snapshot yourself and use `--weights DIR` or `VZ_WEIGHTS` |
 | `veizik inspect` reports the model's weights as missing | expected: the weights are external to the install | nothing to fix; check with `veizik run … --weights DIR` |
 | `veizik models` shows `incomplete (no weights)` | a per-model status label: the weights are external to the install | ignore it; check with `veizik run … --weights DIR` |
@@ -358,7 +388,8 @@ Never include your device key files, activation key or CLI password. Support: su
   that is within 3 days of expiring), and `pull`/`hf` use the network.
 - It does not upload prompts, outputs or telemetry.
 
-Not in this release: LoRA adapters; image or other multimodal input; a weight converter;
+Not in this release: LoRA adapters; image or video input on the Qwen3.5 models or through `chat` /
+`serve`; audio input; a weight converter;
 pulling weights; tool or function calling, `logprobs`, structured output and embeddings over HTTP;
 per-user API keys, an in-server usage ledger and tenant quotas on the CUDA server; a non-loopback
 bind through the CLI; published server throughput.
