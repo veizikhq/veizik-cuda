@@ -1,4 +1,15 @@
-# veizik-cuda 1.0.0 (Qwen3.5 / Qwen3.6) — Deployment & Support
+# veizik-cuda — Deployment & Support
+
+This folder holds the support documentation for both NVIDIA / Linux packages in this repository:
+
+| package | release | guide | release notes |
+|---|---|---|---|
+| Qwen3.5 / Qwen3.6 language models — `veizik-qwen-cuda-1.0.0-linux-x86_64.tar` | `v1.0.0` | this file, [`CLI_USAGE.md`](CLI_USAGE.md), [`USAGE_GUIDE.md`](USAGE_GUIDE.md), [`bench/REPRODUCIBILITY.md`](bench/REPRODUCIBILITY.md) | [`RELEASE_NOTES.md`](RELEASE_NOTES.md) |
+| Wan2.1 / Wan2.2 video models — `veizik-wan-1.2.0-linux-x86_64.tar` | `v1.2.0` | [`wan/README.md`](wan/README.md) | [`wan/RELEASE_NOTES.md`](wan/RELEASE_NOTES.md) |
+
+The rest of this file covers the Qwen package.
+
+## veizik-cuda 1.0.0 (Qwen3.5 / Qwen3.6)
 
 Veizik runs the Qwen3.5 (0.8B, 2B, 4B, 9B) and Qwen3.6-35B-A3B language models **on your own NVIDIA
 GPU** through its own native engine: per-architecture native CUDA code, no Python runtime,
@@ -7,8 +18,9 @@ server (chat completions, text completions, streaming). This folder is the autho
 documentation for the shipped CUDA Qwen package — install, activation, every CLI command, serving
 over HTTP, and a reproducible benchmark set.
 
-> **Scope.** This covers the CUDA/Linux Qwen package (`veizik-cuda`). The Apple-Silicon
-> (`veizik-metal`) deployment is a separate package with its own documentation.
+> **Scope.** This covers the CUDA/Linux Qwen package. The WAN video package has its own guide in
+> [`wan/`](wan/). The Apple-Silicon (`veizik-metal`) deployment is a separate package with its own
+> documentation.
 
 ---
 
@@ -18,7 +30,8 @@ over HTTP, and a reproducible benchmark set.
 |---|---|
 | Product | `veizik-cuda 1.0.0 (Qwen3.5 / Qwen3.6)` |
 | Package | `veizik-qwen-cuda-1.0.0-linux-x86_64.tar` |
-| Package SHA-256 | `20681397a43d3a9093aa25517a1e61bc594d0a4df2a1a583189d914bf3d58c55` (short form `20681397`) |
+| Package SHA-256 | `9deb3497b23f233a9bfabbff2dd1bfb10a60b316a5a361010f5ce41b40b880dd` (short form `9deb3497`) |
+| Replaces | the withdrawn tarball `20681397…` (same file name). Only the launcher that opens the sealed engine changed: it was rebuilt with loader hardening. The engine and the GPU code are unchanged |
 | CLI version (`veizik version`) | `1.2.0` — CLI build `9b000b81` (x86_64); the tarball's aarch64 CLI is build `af92fd50` but the engine is x86-64 only |
 | Backend | `CUDA` (native kernels, one set per GPU architecture) |
 | Signing | engine files integrity-sealed and checked at every start; the release catalogue is signed with Veizik's production code-signing key and can be verified with the bundled public key |
@@ -56,7 +69,7 @@ where it matters in
 
 1. Verify the tarball, then unpack it:
    ```bash
-   echo "20681397a43d3a9093aa25517a1e61bc594d0a4df2a1a583189d914bf3d58c55  veizik-qwen-cuda-1.0.0-linux-x86_64.tar" | sha256sum -c -
+   echo "9deb3497b23f233a9bfabbff2dd1bfb10a60b316a5a361010f5ce41b40b880dd  veizik-qwen-cuda-1.0.0-linux-x86_64.tar" | sha256sum -c -
    # must print: veizik-qwen-cuda-1.0.0-linux-x86_64.tar: OK
    tar xf veizik-qwen-cuda-1.0.0-linux-x86_64.tar
    cd veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86
@@ -184,7 +197,7 @@ printf '%s' "$CLI_PASSWORD" | veizik activate --key vzek_… --password-stdin
 ## 4. Quick start
 
 ```bash
-# one-shot generation (greedy by default); token ids are written to ~/veizik-out/gen.txt
+# one-shot generation (greedy by default); the output is written to ~/veizik-out/gen.txt
 veizik run qwen35_2b "The capital of France is" --tokens 32
 
 # a larger model, a named mode, a prompt from a file, a chosen output folder
@@ -206,9 +219,10 @@ veizik bench qwen35_9b
 veizik chat qwen35_2b
 ```
 
-`run` writes the generated **token ids** (whitespace-separated) to `gen.txt`. To read the output as
-text, use `serve` (`/v1/chat/completions` returns text) or `veizik chat` (interactive, returns text), or
-decode the ids with the checkpoint's tokenizer ([`USAGE_GUIDE.md`](USAGE_GUIDE.md) §1). The complete
+`run` writes the generated text to `gen.txt`; the engine detokenizes (the package's own
+`INTERFACE.json`: "generated text, detokenized by the engine"). If a `gen.txt` holds
+whitespace-separated numbers instead, they are token ids: decode them with the checkpoint's tokenizer
+([`USAGE_GUIDE.md`](USAGE_GUIDE.md) §1). `serve` and `veizik chat` return text. The complete
 command reference — every verb, every flag, with examples — is in **[`CLI_USAGE.md`](CLI_USAGE.md)**.
 
 ---
@@ -227,8 +241,9 @@ Veizik publishes its own measured figures only. The decode board for this packag
 | Qwen3.6-35B-A3B | — | — | 450 (`fast`: 545) |
 
 These rows are **previous-version rows**: they were measured on the previous build (the LLM-only
-1.0.0 build of this package, 2026-10-21) and were not re-measured on tar `20681397`; the GPU code is
-the same per-architecture set. Each figure names its GPU, mode, operating point and run count; none
+1.0.0 build of this package, 2026-10-21) and were not re-measured on tar `9deb3497` (nor on the
+withdrawn `20681397`); the GPU code is the same per-architecture set, and this tarball changes only
+the launcher that opens the sealed engine. Each figure names its GPU, mode, operating point and run count; none
 is projected. `quality` mode, per-run values, spread, resident memory and 1,024-token runs are in the
 data files.
 
@@ -253,5 +268,6 @@ throughput over HTTP is not published for this release.
 | Reproduce the benchmark board | [`bench/REPRODUCIBILITY.md`](bench/REPRODUCIBILITY.md) |
 | This release's contents and checksums | [`RELEASE_NOTES.md`](RELEASE_NOTES.md) |
 | What `doctor` / `status` assert | `veizik doctor` (CLI binary, install root, activation service), `veizik status` (lease) |
-| Licence terms | Install and evaluation are free; production use is licensed. The terms are the Veizik Terms of Service, section "License & entitlement" (https://veizik.com/terms), together with the Veizik distribution licence (the `LICENSE` file at https://github.com/veizikhq/veizik-metal). This package does not ship a separate licence file. Model weights stay under their publisher's licence |
+| Licence terms | Install and evaluation are free; production use is licensed. The terms are the Veizik Terms of Service, section "License & entitlement" (https://veizik.com/terms), together with the Veizik distribution licence ([`LICENSE`](../LICENSE) at the root of this repository) and the third-party notices ([`NOTICE.md`](../NOTICE.md)). The tarball itself does not carry a licence file. Model weights stay under their publisher's licence |
+| The WAN video package | [`wan/README.md`](wan/README.md) |
 | Support | support@veizik.com |

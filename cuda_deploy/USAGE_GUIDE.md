@@ -11,7 +11,7 @@ release the text says so.
 
 | mode | command | use it for | streaming | concurrency |
 |---|---|---|---|---|
-| one-shot | `veizik run <model> "<prompt>"` | scripts, single generations | no — token ids are written to `gen.txt` when the run finishes | one generation per process |
+| one-shot | `veizik run <model> "<prompt>"` | scripts, single generations | no — the generated text is written to `gen.txt` when the run finishes | one generation per process |
 | interactive | `veizik chat <model>` | talking to a model in the terminal: type a message, read the text reply, repeat (each message is answered on its own; no history is kept between messages) | — | — |
 | HTTP server | `veizik serve <model>` | chat and text completions for applications and OpenAI-compatible clients (`POST /v1/chat/completions`) | **yes** — server-sent events (§2) | batched across a fixed number of slots (§2) |
 
@@ -23,10 +23,10 @@ Each `run` loads the model, generates and exits, so model load time is paid on e
 always runs the `balanced` configuration. `bench` runs `balanced`. An unknown mode is an error
 (exit 2), never a silent substitution.
 
-**Reading `gen.txt`.** A one-shot run writes the generated **token ids**, whitespace-separated, to
-`<out>/gen.txt`. To read the output as text, use `veizik serve` (`/v1/chat/completions` returns text) or
-`veizik chat` (interactive, returns text), or decode the ids with the tokenizer of the checkpoint you
-supplied, for example:
+**Reading `gen.txt`.** A one-shot run writes the generated **text** to `<out>/gen.txt`; the engine
+detokenizes (the package's `INTERFACE.json`: "generated text, detokenized by the engine"). If a
+`gen.txt` holds whitespace-separated numbers instead, they are token ids; decode them with the
+tokenizer of the checkpoint you supplied, for example:
 
 ```python
 from tokenizers import Tokenizer          # pip install tokenizers
@@ -50,7 +50,7 @@ veizik run qwen35_4b "$P" --tokens 96 --out ./out
 ```
 
 In validation every one-shot run produced exactly the number of tokens requested; it does not stop
-at the end-of-turn token. Trim the decoded text at `<|im_end|>`. The chat endpoint of `serve` applies the
+at the end-of-turn token. Trim the text at `<|im_end|>`. The chat endpoint of `serve` applies the
 chat template for you and stops at end-of-sequence.
 
 ---
@@ -325,7 +325,7 @@ What you can do:
 | `quality … does not fit this N MiB GPU; using balanced` | 35B-A3B `quality` needs about 26 GB or more | accept `balanced`, or use a larger card |
 | CUDA out-of-memory | the model, mode and context do not fit | use a smaller model or `--mode low-memory`; close other GPU programs |
 | `run` / `serve` exits `1` after the engine finished | the engine could not confirm the configuration it ran in; the result is not what you asked for | re-run; report it if it repeats |
-| `gen.txt` is a list of numbers | `run` writes token ids | read text with `serve` or `veizik chat`, or decode the ids with the checkpoint's tokenizer (§1) |
+| `gen.txt` is a list of numbers | those are token ids, not text | read text with `serve` or `veizik chat`, or decode the ids with the checkpoint's tokenizer (§1) |
 | `veizik pull` says it "cannot fetch weights for this package" | `pull` has no source for this package's checkpoints | download the Hugging Face snapshot yourself and use `--weights DIR` or `VZ_WEIGHTS` |
 | `veizik inspect` reports the model's weights as missing | expected: the weights are external to the install | nothing to fix; check with `veizik run … --weights DIR` |
 | `veizik models` shows `incomplete (no weights)` | a per-model status label: the weights are external to the install | ignore it; check with `veizik run … --weights DIR` |

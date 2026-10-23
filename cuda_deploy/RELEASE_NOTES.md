@@ -4,12 +4,25 @@
 the models through its own native CUDA engine — no Python runtime, no CUDA toolkit, no cloud at
 inference time. You supply the weights; nothing leaves the machine.
 
-- Package: `veizik-qwen-cuda-1.0.0-linux-x86_64.tar`  ·  SHA-256 `20681397a43d3a9093aa25517a1e61bc594d0a4df2a1a583189d914bf3d58c55`  ·  CLI `1.2.0` (x86_64 build `9b000b81`, aarch64 build `af92fd50`)  ·  backend CUDA
+- Package: `veizik-qwen-cuda-1.0.0-linux-x86_64.tar`  ·  SHA-256 `9deb3497b23f233a9bfabbff2dd1bfb10a60b316a5a361010f5ce41b40b880dd`  ·  CLI `1.2.0` (x86_64 build `9b000b81`, aarch64 build `af92fd50`)  ·  backend CUDA
 - Supported: `qwen35_0p8b`, `qwen35_2b`, `qwen35_4b`, `qwen35_9b`, `qwen36_35b_a3b`  ·  Hardware: NVIDIA compute capability 8.0+ — `sm_80` / `sm_86` / `sm_89` / `sm_90a` / `sm_100a` / `sm_120a`
 - GPU code ships as per-architecture **cubin (SASS)**; the loader does no JIT
-- Install: `echo "20681397a43d3a9093aa25517a1e61bc594d0a4df2a1a583189d914bf3d58c55  veizik-qwen-cuda-1.0.0-linux-x86_64.tar" | sha256sum -c - && tar xf veizik-qwen-cuda-1.0.0-linux-x86_64.tar && cd veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86 && ./install.sh`   (full guide: [README](README.md))
+- Install: `echo "9deb3497b23f233a9bfabbff2dd1bfb10a60b316a5a361010f5ce41b40b880dd  veizik-qwen-cuda-1.0.0-linux-x86_64.tar" | sha256sum -c - && tar xf veizik-qwen-cuda-1.0.0-linux-x86_64.tar && cd veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86 && ./install.sh`   (full guide: [README](README.md))
 - Benchmarks: Veizik's own measured figures — [bench/REPRODUCIBILITY.md](bench/REPRODUCIBILITY.md)  (reproduce: [bench/repro_kit/](bench/repro_kit/))
-- Licence: install + evaluation free; production use licensed. Terms: Veizik Terms of Service, "License & entitlement" (https://veizik.com/terms), and the Veizik distribution licence (`LICENSE` at https://github.com/veizikhq/veizik-metal); this package ships no separate licence file ([README](README.md) §6).
+- Licence: install + evaluation free; production use licensed. Terms: Veizik Terms of Service, "License & entitlement" (https://veizik.com/terms), and the Veizik distribution licence ([`LICENSE`](../LICENSE)) with the third-party notices ([`NOTICE.md`](../NOTICE.md)) at the root of this repository ([README](README.md) §6).
+- Replaces: the withdrawn tarball `20681397a43d3a9093aa25517a1e61bc594d0a4df2a1a583189d914bf3d58c55` (same file name). Delete it and download again.
+
+## Changed in this tarball (9deb3497, replaces the withdrawn 20681397)
+
+- The launcher that opens the sealed engine was rebuilt with loader hardening against unprivileged
+  extraction of the GPU code: it re-executes itself in a clean environment before it opens the GPU
+  code, and checks its own integrity at run time — runtime anti-tamper aborts naive binary patches
+  (a determined on-disk patch remains a known residual). The device key never leaves the device.
+  Nothing you type or see changes.
+- The engine and the per-architecture GPU code are byte-for-byte those of `20681397`, so its
+  benchmark rows carry unchanged (they remain previous-version rows; see below).
+- The activation flow, the model catalogue, the `veizik` command (CLI `1.2.0`) and the folder name
+  are unchanged.
 
 ## Added
 
@@ -56,9 +69,9 @@ inference time. You supply the weights; nothing leaves the machine.
   `keys`, `usage`, `audit` and `quota` are local CLI tools that the CUDA server does not read.
 - **Stopping a detached server:** `veizik stop` does not see the CUDA server. If you started it in
   the background, stop it by signalling the engine process (find it with `ss -ltnp` on the port).
-- **`run` writes token ids.** `gen.txt` holds the generated token ids (whitespace-separated). To read
-  output as text use `serve` or `veizik chat`, which return text, or decode the ids with the tokenizer
-  of the checkpoint you supplied.
+- **`run` output.** `gen.txt` holds the generated text; the engine detokenizes (per the package's
+  `INTERFACE.json`). If it holds whitespace-separated numbers instead, they are token ids: decode them
+  with the tokenizer of the checkpoint you supplied. `serve` and `veizik chat` return text.
 - **Chat sessions.** `veizik chat` is an interactive terminal session for all five models; each
   message is answered on its own (the CLI session keeps no conversation history between messages).
   `veizik serve` with `POST /v1/chat/completions` is the programmatic chat path; both return text.
@@ -79,7 +92,7 @@ inference time. You supply the weights; nothing leaves the machine.
   configuration.
 - **Benchmark rows are previous-version rows.** They were measured on the previous build (the
   LLM-only 1.0.0 build, 2026-10-21) with the same per-architecture GPU code, and were not re-measured
-  on this tarball. Server throughput over HTTP is not published.
+  on this tarball (`9deb3497`) or on the withdrawn `20681397`. Server throughput over HTTP is not published.
 - **Architectures:** `sm_80`, `sm_90a` and `sm_100a` GPU code is included but was not run in
   validation.
 - **WSL is not supported** for the sealed engine; use a native Linux host. The tarball also contains

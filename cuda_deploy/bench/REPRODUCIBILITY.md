@@ -63,11 +63,16 @@ folder name in your Hugging Face cache):
 
 - Measured **2026-10-21** with `veizik-cuda 1.0.0` on the previous build of this package (the
   LLM-only 1.0.0 build), CLI `veizik run`, on single-GPU cloud hosts, native Linux, driver 595.91.07.
-- **These are previous-version rows.** The shipped tarball is `20681397…ee837`. It carries the same
+- **These are previous-version rows.** The shipped tarball is `9deb3497…80dd`. It carries the same
   per-architecture GPU code as the measured build, but its host engine was not re-timed and its
-  output hashes were not compared against the table in §4. The rows are labelled *previous-version
-  (measured on the previous build; not re-measured for tar 20681397)* in `prov`. Re-run the kit on
-  the shipped bytes to produce same-build rows.
+  output hashes were not compared against the table in §4. Re-run the kit on the shipped bytes to
+  produce same-build rows.
+- **Note on the `prov` label.** The committed rows are labelled *previous-version (measured on the
+  previous build; not re-measured for tar 20681397)*. `20681397…` is the tarball that was current when
+  the rows were labelled; it has since been withdrawn and replaced by `9deb3497…`, which changes only
+  the launcher that opens the sealed engine (engine and GPU code byte-for-byte unchanged). The label
+  applies to `9deb3497` in the same way: these rows were not re-measured on it either. The data files
+  are kept as recorded.
 - Power and load: the hosts were dedicated to the run and the GPUs ran at their default board power
   (the limit was not recorded). **No quiet-gate was applied** — no host-load check is recorded for
   these runs, so they carry the grade "N = 2, dedicated host". Treat the figures as indicative to
@@ -213,7 +218,7 @@ VZ_WEIGHTS_ROOT=/data/models bash run/bench_grid.sh ./raw_mygpu
 
 # 2. medians, spread and the neutral measurement file
 python3 -I run/extract_rows.py --raw ./raw_mygpu --gpu "RTX 4090" --arch sm_89 \
-    --measured-at "$(date +%F) (veizik-cuda 1.0.0, tar 20681397)" \
+    --measured-at "$(date +%F) (veizik-cuda 1.0.0, tar 9deb3497)" \
     --prov "my reproduction" --bench-txt my_bench.txt --rows-json my_rows.json
 ```
 

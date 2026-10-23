@@ -119,9 +119,11 @@ lists where it looked and exits 3.
 | `qwen35_9b` | `Qwen3.5-9B` | `Qwen/Qwen3.5-9B` |
 | `qwen36_35b_a3b` | `Qwen3.6-35B-A3B` | `Qwen/Qwen3.6-35B-A3B` |
 
-**Output.** `gen.txt` in the output folder holds the generated **token ids**, whitespace-separated.
-To read the output as text, use `serve` or `veizik chat` (both return text), or decode the ids with
-the tokenizer of the checkpoint you supplied (snippet in [`USAGE_GUIDE.md`](USAGE_GUIDE.md) §1).
+**Output.** `gen.txt` in the output folder holds the generated **text**; the engine detokenizes (the
+package's `INTERFACE.json`: "generated text, detokenized by the engine"). If a `gen.txt` holds
+whitespace-separated numbers instead, they are token ids: decode them with the tokenizer of the
+checkpoint you supplied (snippet in [`USAGE_GUIDE.md`](USAGE_GUIDE.md) §1). `serve` and `veizik chat`
+also return text.
 `run` prints `output: <folder>` when it finishes; progress
 lines from the launcher (`veizik-run: …`) go to the terminal. In validation every one-shot run
 produced exactly the number of tokens requested; it does not stop early at the end-of-turn token, so
@@ -550,7 +552,7 @@ veizik audit reset --confirm --actor A
 ```
 
 An append-only, hash-chained ledger of counts (never prompts or responses). `--since`/`--until`
-take epoch seconds, `YYYY-MM-DD`, or `Nd`/`Nh`/`Nm`. The chain is tamper-evident, not tamper-proof:
+take epoch seconds, `YYYY-MM-DD`, or `Nd`/`Nh`/`Nm`. The chain is tamper-evident: it shows a change but cannot prevent one;
 pin `audit head` off the machine and check it with `audit verify --expect-head`.
 
 ### `quota` — per-tenant limits
@@ -651,7 +653,7 @@ veizik version                                  # CLI version + backend
 export VZ_WEIGHTS=/data/models                  # folder holding Qwen3.5-0.8B/, Qwen3.5-9B/, …
 veizik activate                                 # register this device (once; needs the 0.8B weights)
 veizik status                                   # activation, expiry
-veizik run qwen35_9b "…" --mode balanced        # generate once; ids in ~/veizik-out/gen.txt
+veizik run qwen35_9b "…" --mode balanced        # generate once; text in ~/veizik-out/gen.txt
 veizik chat qwen35_2b                           # interactive session in the terminal (/exit leaves)
 veizik serve qwen35_2b --weights $VZ_WEIGHTS/Qwen3.5-2B   # OpenAI-compatible server on 127.0.0.1:8000
 veizik bench qwen35_9b                          # time this machine (3 end-to-end runs)

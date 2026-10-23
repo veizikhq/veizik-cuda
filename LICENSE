@@ -1,0 +1,104 @@
+veizik-cuda — Proprietary Software License
+Copyright (c) 2026 LinkPick. All rights reserved.
+Veizik is a brand of LinkPick, a sole proprietorship registered in the Republic of Korea
+(business registration 148-14-02554, representative Bak Malgeum).
+
+This repository distributes COMPILED ARTIFACTS of the Veizik runtime for NVIDIA GPUs
+on Linux. It is not open source. Neither the source nor the toolchain that compiles it is
+included here, and neither is licensed by this file.
+
+1. OWNERSHIP AND SCOPE
+   The "Software" means the distributed binaries: the engines, their sealed GPU code
+   and other protected runtime assets, the `veizik` command-line tool, the launchers,
+   the installer and the model catalogue, as published in the release assets of this repository. They are
+   the exclusive property of LinkPick and are protected by copyright and trade-secret law.
+
+   The "Documentation" means the text files in this repository. It is published so that
+   people can read, quote and check it, and this licence does not restrict doing so; it
+   remains copyright LinkPick, and the Software's terms are not changed by anything in it.
+
+2. GRANT
+   a. Personal, educational, research and evaluation use is permitted at no charge.
+      Internal evaluation inside a company or institution is included.
+   b. Commercial use — production work, client delivery, advertising, or use as a
+      component of a paid service — requires a separate commercial license from LinkPick.
+   c. Output produced with the Software belongs to you. This license claims nothing over
+      the text, images or video the models generate.
+
+3. RESTRICTIONS
+   a. No redistribution. Do not mirror, re-host, bundle or hand the binaries to third
+      parties. Downloads come from LinkPick's official channel so that a user can know the
+      bytes they received are the bytes in the published checksums.
+   b. No hosting as a service. Offering the Software as the backend of a SaaS, an API
+      service or a render/inference farm requires a separate written agreement.
+   c. No competing implementation. Do not copy or adapt the Software, or any part of it,
+      into a competing inference engine, kernel set or compiler. This does not restrict
+      running, studying, measuring or publishing about the Software — see section 4 — and
+      it does not apply where applicable law says such a restriction cannot.
+   d. No reverse engineering, decompilation, or disassembly, except where that right
+      cannot be excluded by applicable law (for example, for interoperability, or to
+      observe, study or test the Software in the course of using it).
+   e. Do not remove, disable or circumvent the seal, the signature or
+      any licensing mechanism.
+
+4. BENCHMARKS — EXPLICITLY PERMITTED
+   Publishing performance or quality measurements taken with the Software is permitted,
+   including comparisons where a competing engine wins. No prior approval and no notice
+   is required, and nothing in section 3 restricts it.
+
+   We ask — as a request, not as a condition of this licence — that you state the build
+   you measured (the sha256 of the core) and the hardware, because a number without its
+   conditions is useless to everyone. Not doing so is not a breach of anything.
+
+5. THIRD-PARTY COMPONENTS
+   These packages bundle no third-party binaries. At run time they use the NVIDIA driver
+   (libcuda) and the Linux system libraries already on your machine, under their own terms.
+   Model checkpoints are NOT included and are NOT licensed by this file: the Qwen3.5,
+   Qwen3.6, Wan2.1 and Wan2.2 weights carry their publishers' own licenses, and you run
+   your own copy of them under those terms. See NOTICE.md.
+
+6. NO WARRANTY
+   The Software is provided "as is", without warranty of any kind, express or implied,
+   including merchantability, fitness for a particular purpose and non-infringement. Models
+   marked EXPERIMENTAL in a package's model catalogue may change between releases.
+   Verification and support are limited to Linux on x86-64 with the NVIDIA GPU
+   architectures listed in README.md; behaviour on any other device carries no warranty.
+
+7. LIMITATION OF LIABILITY
+   To the maximum extent permitted by law, LinkPick is not liable for any indirect,
+   incidental, special, consequential or punitive damages, or for lost profits, data or
+   business, arising from the use of or inability to use the Software.
+
+   Nothing in this licence limits or excludes liability for death or personal injury, for
+   fraud or fraudulent misrepresentation, for wilful misconduct or gross negligence, or
+   any other liability that cannot be limited or excluded under applicable law.
+
+8. TERMINATION
+   This license terminates automatically on breach of section 3. On termination you must
+   stop using the Software and delete the binaries.
+
+9. GOVERNING LAW AND VENUE
+   The laws of the Republic of Korea govern this licence, with venue in the courts of
+   Seoul.
+
+   If you are a consumer, this does not deprive you of the protection of the mandatory law
+   of your country of residence, nor of any right you have to bring proceedings there.
+
+10. EXPORT CONTROL
+   You are responsible for complying with the export control and sanctions laws that apply
+   to you. Do not use, export or re-export the Software in violation of them.
+
+11. GENERAL
+   a. Severability. If a provision of this licence is held unenforceable, it is limited or
+      severed to the minimum extent necessary and the rest remains in force.
+   b. No implied licence. No patent, trademark or other right is granted except as stated
+      here expressly.
+   c. Entire agreement. This licence, together with any separate commercial licence you
+      have signed, is the whole agreement about the Software; a separate signed commercial
+      licence prevails where the two differ.
+   d. Assignment. You may not assign this licence. LinkPick may assign it with the
+      business it relates to.
+   e. Survival. Sections 1, 3, 4, 6, 7, 9, 10 and 11 survive termination.
+   f. No waiver. Not enforcing a provision on one occasion does not waive it.
+
+Commercial licensing and questions: LinkPick.
