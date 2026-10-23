@@ -20,7 +20,7 @@ The Qwen language package has its own guide: [`../README.md`](../README.md).
 | Package SHA-256 | `8a594e6587db6259175936d60e1604a2156d4835e72dcc458dcc685783e8b027` |
 | Size | 7,112,192 B, 172 files |
 | Host | Linux x86-64 with an NVIDIA GPU and its driver (`libcuda.so.1`). No Python, no framework, no CUDA toolkit |
-| GPU code | precompiled kernel sets, sealed at rest: a base set for `sm_86` / `sm_89`, and separate sets for `sm_80`, `sm_90a`, `sm_100a` and `sm_120a`. The launcher picks the set for the GPU it finds |
+| GPU code | precompiled kernel sets, sealed at rest, one per architecture: `sm_80`, `sm_86`, `sm_89`, `sm_90a`, `sm_100a` and `sm_120a`. The launcher picks the set for the GPU it finds |
 | Activation | required — the kernels open only on a device activated for this release |
 | Model weights | **not included** — you download the published checkpoints (§3) |
 

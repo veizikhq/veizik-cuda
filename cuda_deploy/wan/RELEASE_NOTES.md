@@ -6,7 +6,7 @@ time. You supply the weights; prompts and frames stay on the machine.
 
 - Package: `veizik-wan-1.2.0-linux-x86_64.tar`  ·  SHA-256 `8a594e6587db6259175936d60e1604a2156d4835e72dcc458dcc685783e8b027`  ·  7,112,192 B
 - Models: `wan21_t2v_1_3b`, `wan21_t2v_14b`, `wan22_t2v_a14b`, `wan22_i2v_a14b`
-- Hardware: Linux x86-64, NVIDIA GPU with a precompiled kernel set — base set `sm_86` / `sm_89`, plus `sm_80`, `sm_90a`, `sm_100a`, `sm_120a`
+- Hardware: Linux x86-64, NVIDIA GPU with a precompiled kernel set, one per architecture: `sm_80`, `sm_86`, `sm_89`, `sm_90a`, `sm_100a` and `sm_120a`
 - Install: `echo "8a594e6587db6259175936d60e1604a2156d4835e72dcc458dcc685783e8b027  veizik-wan-1.2.0-linux-x86_64.tar" | sha256sum -c - && tar xf veizik-wan-1.2.0-linux-x86_64.tar && cd veizik-wan-1.2.0-linux-x86_64` (full guide: [README](README.md))
 - Licence: install + evaluation free; production use licensed. Terms: Veizik Terms of Service (https://veizik.com/terms) and the Veizik distribution licence ([`LICENSE`](../../LICENSE)); third-party works in [`NOTICE.md`](../../NOTICE.md).
 

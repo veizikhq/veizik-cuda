@@ -45,7 +45,7 @@ All five are marked EXPERIMENTAL in the signed model catalogue. Memory is measur
 | `wan22_t2v_a14b` | Wan2.2-T2V-A14B (two experts) | `Wan-AI/Wan2.2-T2V-A14B-Diffusers` | text to video | 1280×720 · 81 · 40 |
 | `wan22_i2v_a14b` | Wan2.2-I2V-A14B (two experts) | `Wan-AI/Wan2.2-I2V-A14B-Diffusers` | image to video | 832×480 · 81 · 40 |
 
-The WAN kernel sets are: a base set for `sm_86` / `sm_89`, and separate sets for `sm_80`, `sm_90a`, `sm_100a` and `sm_120a`. Every speed figure Veizik states for this bundle was measured on an RTX 3090 (`sm_86`) only; other GPUs run their own kernel sets at speeds not measured.
+The WAN package carries six kernel sets, one per architecture: `sm_80`, `sm_86`, `sm_89`, `sm_90a`, `sm_100a` and `sm_120a`. Every speed figure Veizik states for this bundle was measured on an RTX 3090 (`sm_86`) only; other GPUs run their own kernel sets at speeds not measured.
 
 ## Install and first run
 
