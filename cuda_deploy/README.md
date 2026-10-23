@@ -14,8 +14,8 @@ The rest of this file covers the Qwen package.
 Veizik runs the Qwen3.5 (0.8B, 2B, 4B, 9B) and Qwen3.6-35B-A3B language models **on your own NVIDIA
 GPU** through its own native engine: per-architecture native CUDA code, no Python runtime,
 no CUDA toolkit, no cloud at inference time. `veizik serve` provides a local OpenAI-compatible HTTP
-server (chat completions, text completions, streaming). On Qwen3.6-35B-A3B, `veizik run` also takes
-one image or one video (a folder of frames) with the text prompt (§4a). This folder is the authoritative support
+server (chat completions, text completions, streaming). On Qwen3.6-35B-A3B, the package's launcher also
+takes one image or one video (a folder of frames) with the text prompt (§4a). This folder is the authoritative support
 documentation for the shipped CUDA Qwen package — install, activation, every CLI command, serving
 over HTTP, and a reproducible benchmark set.
 
@@ -30,12 +30,12 @@ over HTTP, and a reproducible benchmark set.
 | Item | Value |
 |---|---|
 | Product | `veizik-cuda 1.1.0 (Qwen3.5 / Qwen3.6)` |
-| Package | `veizik-qwen-cuda-1.1.0-linux-x86_64.tar` (58,570,240 B) |
-| Package SHA-256 | `4358658784da453028a916d81379c117bb07691224a3ee3df828bce154ec9907` (short form `43586587`) |
+| Package | `veizik-qwen-cuda-1.1.0-linux-x86_64.tar` (58,573,312 B) |
+| Package SHA-256 | `d38f30780b873bac616b5b1e7e54a47ee6e8c9dcb5ad18fe47d86a6457852a54` (short form `d38f3078`) |
 | Supersedes | `veizik-cuda 1.0.0`. 1.1.0 adds image and video input on Qwen3.6-35B-A3B; the five text models are unchanged |
 | CLI version (`veizik version`) | `1.2.0` — CLI build `9b000b81` (x86_64); the tarball's aarch64 CLI is build `af92fd50` but the engine is x86-64 only |
 | Backend | `CUDA` (native kernels, one set per GPU architecture) |
-| Signing | engine files integrity-sealed and checked at every start |
+| Signing | engine files integrity-sealed and checked at every start; the release catalogue is signed with Veizik's production code-signing key and can be verified with the bundled public key |
 | GPU architectures | `sm_80` / `sm_86` / `sm_89` / `sm_90a` / `sm_100a` / `sm_120a` — GPU code ships as per-architecture cubin (SASS); the loader does no JIT. The image and video stage ships GPU code for `sm_86`, `sm_89` and `sm_120a` |
 | Model weights | **not included** — you download the public checkpoints (§2, "Model weights") |
 
@@ -47,7 +47,7 @@ Shipped models (pass the **model key** to the CLI):
 | `qwen35_2b` | Qwen3.5-2B | `Qwen/Qwen3.5-2B` | |
 | `qwen35_4b` | Qwen3.5-4B | `Qwen/Qwen3.5-4B` | |
 | `qwen35_9b` | Qwen3.5-9B | `Qwen/Qwen3.5-9B` | |
-| `qwen36_35b_a3b` | Qwen3.6-35B-A3B | `Qwen/Qwen3.6-35B-A3B` | mixture of experts, 35B total / about 3B active per token; image and video input on `veizik run` |
+| `qwen36_35b_a3b` | Qwen3.6-35B-A3B | `Qwen/Qwen3.6-35B-A3B` | mixture of experts, 35B total / about 3B active per token; image and video input through the package's launcher (§4a) |
 
 **Weights are yours.** The package contains the engine, not the models. You point Veizik at a
 checkpoint you already have the right to use; several upstream checkpoints are released under their
@@ -70,7 +70,7 @@ where it matters in
 
 1. Verify the tarball, then unpack it:
    ```bash
-   echo "4358658784da453028a916d81379c117bb07691224a3ee3df828bce154ec9907  veizik-qwen-cuda-1.1.0-linux-x86_64.tar" | sha256sum -c -
+   echo "d38f30780b873bac616b5b1e7e54a47ee6e8c9dcb5ad18fe47d86a6457852a54  veizik-qwen-cuda-1.1.0-linux-x86_64.tar" | sha256sum -c -
    # must print: veizik-qwen-cuda-1.1.0-linux-x86_64.tar: OK
    tar xf veizik-qwen-cuda-1.1.0-linux-x86_64.tar
    cd veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86
@@ -223,11 +223,14 @@ veizik chat qwen35_2b
 ### 4a. Image and video input (Qwen3.6-35B-A3B only)
 
 ```bash
+# the package's launcher (INTERFACE.json entry PIPELINE.sh) in the installed engine folder
+export VEIZIK_ROOT=$HOME/.local/lib/veizik/veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86
+
 # one image (PNG or JPEG) with a text prompt; photo.png stands for your own file
-veizik run qwen36_35b_a3b --image photo.png --prompt "What is in this picture?" --out ./out
+"$VEIZIK_ROOT"/PIPELINE.sh --model qwen36_35b_a3b --image photo.png --prompt "What is in this picture?" --out ./out
 
 # one video: a folder of 2–256 PNG or JPEG frames, all the same size, in file-name order
-veizik run qwen36_35b_a3b --video ./frames --video-fps 2 --prompt-file question.txt --out ./out
+"$VEIZIK_ROOT"/PIPELINE.sh --model qwen36_35b_a3b --video ./frames --video-fps 2 --prompt-file question.txt --out ./out
 ```
 
 Each run takes exactly one image or one video, never both, and always with `--prompt` or

@@ -46,7 +46,7 @@ veizik <command> [arguments]
 |---|---|
 | `0` | success |
 | `1` | `run`/`serve`: the engine failed, or finished without confirming the configuration it ran in (the result is not what you asked for); `status`: the lease is in its renewal grace period |
-| `2` | usage error: no args, unknown command, unknown or invalid option, missing or blank argument, out-of-range value, unknown model or mode; for `run`/`serve` also: the engine refused the model configuration, or the GPU generation could not be read (set `Q35_SEAL_ARCH`); image or video input that cannot be used (wrong model, more than one image or video, `--image` with `--video`, no text prompt, an unsupported or damaged file, frames of different sizes or fewer than 2 / more than 256, over the size or aspect-ratio budget, or a GPU the image or video stage does not support) |
+| `2` | usage error: no args, unknown command, unknown or invalid option, missing or blank argument, out-of-range value, unknown model or mode; for `run`/`serve` also: the engine refused the model configuration, or the GPU generation could not be read (set `Q35_SEAL_ARCH`); image or video input that cannot be used (wrong model, more than one image or video, `--image` with `--video`, no text prompt, an unsupported or damaged file, frames of different sizes or fewer than 2 / more than 256, over the size or aspect-ratio budget) |
 | `3` | an input is missing or unreadable: model weights, tokenizer, prompt file, the image file, the video frames folder, or the output folder cannot be created |
 | `4` | model not found, or not usable for the command; `status`: not activated or expired; `run`/`serve`: the engine could not start because its integrity check failed (a file was changed, added or removed — reinstall) or its GPU modules did not open |
 | `5` | the CLI binary failed its own integrity check; `activate --refresh` could not renew |
@@ -67,7 +67,6 @@ find the model" or "the engine could not start"; the message printed before it s
 ```
 veizik run <model> "<prompt>" [options]
 veizik run <model> --prompt TEXT | --prompt-file FILE [options]
-veizik run qwen36_35b_a3b --image FILE | --video DIR (--prompt TEXT | --prompt-file FILE) [options]
 ```
 
 - `<model>` — one of the five model keys: `qwen35_0p8b`, `qwen35_2b`, `qwen35_4b`, `qwen35_9b`,
@@ -96,11 +95,23 @@ veizik run qwen36_35b_a3b --image FILE | --video DIR (--prompt TEXT | --prompt-f
 | `--top-p X` | 0 – 1 | — | nucleus threshold — **experimental** |
 | `--top-k N` | 0 – 1000 | — | top-k — **experimental** |
 | `--seed N` | 0 – 2147483647 | — | sampling seed — **experimental** |
+
+**Image and video input (Qwen3.6-35B-A3B only).** These are options of the package's launcher —
+the `PIPELINE.sh` entry named in the engine folder's `INTERFACE.json` — and are listed there:
+
+```
+"$VEIZIK_ROOT"/PIPELINE.sh --model qwen36_35b_a3b --image FILE | --video DIR (--prompt TEXT | --prompt-file FILE) [options]
+```
+
+| option | value | default | meaning |
+|---|---|---|---|
 | `--image FILE` | PNG or JPEG | — | `qwen36_35b_a3b` only: an image the model looks at; exactly one per run; needs `--prompt` or `--prompt-file`; applies the chat template (the answer ends at the end-of-turn token). `--image-file` is the same option |
 | `--image-max-pixels N` | 65536 – 16777216 | `1048576` | upper bound on the image's pixel count after resizing; a larger image is scaled down to fit. More pixels keep more detail and use more memory and time. Needs `--image` |
 | `--video DIR` | folder of PNG or JPEG frames | — | `qwen36_35b_a3b` only: 2 to 256 frames, all the same size, in file-name order (= time order); exactly one video per run; needs `--prompt` or `--prompt-file`; not with `--image`; applies the chat template (the answer ends at the end-of-turn token) |
 | `--video-fps X` | 0.001 – 1000 | `2` | frame rate of the frames in the `--video` folder; it sets the time stamps the model sees between frames. Needs `--video` |
 | `--video-max-pixels N` | 65536 – 16777216 | `262144` | upper bound on every frame's pixel count after resizing; larger frames are scaled down to fit. More pixels keep more detail and use more memory and context. Needs `--video` |
+
+On a GPU the image and video stage does not support, the run is refused cleanly with code 50 (`the image stage refused this request (status 50)`) before any image or video work. Usage and limits: [`USAGE_GUIDE.md`](USAGE_GUIDE.md) §1a.
 
 **Where the weights are looked for**, in this order, stopping at the first complete checkpoint:
 
@@ -135,9 +146,6 @@ If the device lease is missing or within 3 days of expiring and this machine is 
 `run` first renews it without a browser and says so.
 
 ```bash
-# image input (Qwen3.6-35B-A3B only); photo.png stands for your own PNG or JPEG
-veizik run qwen36_35b_a3b --image photo.png --prompt "What is in this picture?" --out ./out
-
 # chat-formatted prompt, 64 tokens
 P=$(printf '<|im_start|>user\nWhat is the capital of France? Answer in one short sentence.<|im_end|>\n<|im_start|>assistant')
 VZ_WEIGHTS=/data/models veizik run qwen35_2b "$P" --tokens 64 --out ./out

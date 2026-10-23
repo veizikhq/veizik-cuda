@@ -4,29 +4,29 @@
 the models through its own native CUDA engine — no Python runtime, no CUDA toolkit, no cloud at
 inference time. You supply the weights; nothing leaves the machine.
 
-- Package: `veizik-qwen-cuda-1.1.0-linux-x86_64.tar`  ·  SHA-256 `4358658784da453028a916d81379c117bb07691224a3ee3df828bce154ec9907`  ·  58,570,240 B  ·  CLI `1.2.0` (x86_64 build `9b000b81`, aarch64 build `af92fd50`)  ·  backend CUDA
+- Package: `veizik-qwen-cuda-1.1.0-linux-x86_64.tar`  ·  SHA-256 `d38f30780b873bac616b5b1e7e54a47ee6e8c9dcb5ad18fe47d86a6457852a54`  ·  58,573,312 B  ·  CLI `1.2.0` (x86_64 build `9b000b81`, aarch64 build `af92fd50`)  ·  backend CUDA
 - Supported: `qwen35_0p8b`, `qwen35_2b`, `qwen35_4b`, `qwen35_9b`, `qwen36_35b_a3b`  ·  Hardware: NVIDIA compute capability 8.0+ — `sm_80` / `sm_86` / `sm_89` / `sm_90a` / `sm_100a` / `sm_120a`
 - GPU code ships as per-architecture **cubin (SASS)**; the loader does no JIT
-- Install: `echo "4358658784da453028a916d81379c117bb07691224a3ee3df828bce154ec9907  veizik-qwen-cuda-1.1.0-linux-x86_64.tar" | sha256sum -c - && tar xf veizik-qwen-cuda-1.1.0-linux-x86_64.tar && cd veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86 && ./install.sh`   (full guide: [README](README.md))
+- Install: `echo "d38f30780b873bac616b5b1e7e54a47ee6e8c9dcb5ad18fe47d86a6457852a54  veizik-qwen-cuda-1.1.0-linux-x86_64.tar" | sha256sum -c - && tar xf veizik-qwen-cuda-1.1.0-linux-x86_64.tar && cd veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86 && ./install.sh`   (full guide: [README](README.md))
 - Benchmarks: Veizik's own measured figures — [bench/REPRODUCIBILITY.md](bench/REPRODUCIBILITY.md)  (reproduce: [bench/repro_kit/](bench/repro_kit/))
 - Licence: install + evaluation free; production use licensed. Terms: Veizik Terms of Service, "License & entitlement" (https://veizik.com/terms), and the Veizik distribution licence ([`LICENSE`](../LICENSE)) with the third-party notices ([`NOTICE.md`](../NOTICE.md)) at the root of this repository ([README](README.md) §6).
 - Supersedes: `veizik-cuda 1.0.0`.
 
 ## 1.1.0 — Added
 
-- **Image input on Qwen3.6-35B-A3B:** `veizik run qwen36_35b_a3b --image FILE --prompt …` — one PNG or
+- **Image input on Qwen3.6-35B-A3B:** `--image FILE --prompt …` on the package's launcher (`PIPELINE.sh`) — one PNG or
   JPEG per run, with `--prompt` or `--prompt-file`. The chat template is applied and the answer ends at
   the end-of-turn token. `--image-max-pixels N` (default 1,048,576) bounds the pixel count after
   resizing; a larger image is scaled down to fit.
-- **Video input on Qwen3.6-35B-A3B:** `veizik run qwen36_35b_a3b --video DIR --prompt …` — a folder of
+- **Video input on Qwen3.6-35B-A3B:** `--video DIR --prompt …` on the package's launcher — a folder of
   2 to 256 PNG or JPEG frames, all the same size, in file-name order; one video per run, not together
   with `--image`. `--video-fps X` (default 2) sets the time stamps between frames;
   `--video-max-pixels N` (default 262,144) bounds every frame's pixel count after resizing.
 - GPU code for the image and video stage for `sm_86`, `sm_89` and `sm_120a`. On a GPU the stage does
-  not support, an image or video run stops with exit 2.
+  not support, the run is refused cleanly with code 50 before any image or video work.
 - New exit-code meanings for image and video runs: `2` for an unusable request or input (wrong model,
   more than one input, no text prompt, an unsupported or damaged file, frames of different sizes or
-  outside 2–256, over the size or aspect-ratio budget, or an unsupported GPU); `3` for an image file
+  outside 2–256, or over the size or aspect-ratio budget); `3` for an image file
   or frames folder that is missing or unreadable.
 
 ## 1.1.0 — Unchanged

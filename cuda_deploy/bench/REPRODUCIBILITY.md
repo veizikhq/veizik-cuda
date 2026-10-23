@@ -64,7 +64,7 @@ folder name in your Hugging Face cache):
 - Measured **2026-10-21** with `veizik-cuda 1.0.0` on the previous build of this package (the
   LLM-only 1.0.0 build), CLI `veizik run`, on single-GPU cloud hosts, native Linux, driver 595.91.07.
 - **These are previous-version rows.** The shipped package is now `veizik-qwen-cuda-1.1.0`
-  (`43586587…`). The rows were measured on 1.0.0 builds of this package, with text input, and were
+  (`d38f3078…`). The rows were measured on 1.0.0 builds of this package, with text input, and were
   not re-measured on 1.1.0; their output hashes were not compared against the table in §4 on 1.1.0.
   The `prov` label in the data files names the 1.0.0 tarball that was current when the rows were
   labelled; the data files are kept as recorded. No figure is published for image or video input.
@@ -214,7 +214,7 @@ VZ_WEIGHTS_ROOT=/data/models bash run/bench_grid.sh ./raw_mygpu
 
 # 2. medians, spread and the neutral measurement file
 python3 -I run/extract_rows.py --raw ./raw_mygpu --gpu "RTX 4090" --arch sm_89 \
-    --measured-at "$(date +%F) (veizik-cuda 1.1.0, tar 43586587)" \
+    --measured-at "$(date +%F) (veizik-cuda 1.1.0, tar d38f3078)" \
     --prov "my reproduction" --bench-txt my_bench.txt --rows-json my_rows.json
 ```
 

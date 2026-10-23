@@ -48,16 +48,18 @@ template themselves and end at the end-of-turn token.
 
 ## 1a. Image and video input (Qwen3.6-35B-A3B only)
 
-New in 1.1.0. `veizik run qwen36_35b_a3b` can look at one image or one short video together with a
-text prompt. The other four models take text only, and `veizik chat` and `veizik serve` take text only
+New in 1.1.0. On Qwen3.6-35B-A3B the package's launcher (the `PIPELINE.sh` entry named in the engine
+folder's `INTERFACE.json`) can look at one image or one short video together with a text prompt. The other four models take text only, and `veizik chat` and `veizik serve` take text only
 (`serve` answers an image or other non-text message part with 400 `unsupported_content_part`).
 
 ```bash
+export VEIZIK_ROOT=$HOME/.local/lib/veizik/veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86   # the installed engine folder
+
 # one image; photo.png stands for your own PNG or JPEG file
-veizik run qwen36_35b_a3b --image photo.png --prompt "What is in this picture?" --out ./out
+"$VEIZIK_ROOT"/PIPELINE.sh --model qwen36_35b_a3b --image photo.png --prompt "What is in this picture?" --out ./out
 
 # one video: a folder of PNG or JPEG frames, all the same size; file-name order is time order
-veizik run qwen36_35b_a3b --video ./frames --video-fps 2 --prompt-file question.txt --out ./out
+"$VEIZIK_ROOT"/PIPELINE.sh --model qwen36_35b_a3b --video ./frames --video-fps 2 --prompt-file question.txt --out ./out
 ```
 
 | option | default | meaning |
@@ -73,14 +75,13 @@ Rules:
 - One image **or** one video per run, never both, and always with `--prompt` or `--prompt-file`.
 - The chat template is applied for you, and the answer ends at the end-of-turn token.
 - To keep frame names in time order, number them with leading zeros (`0001.png`, `0002.png`, …).
-- The image and video stage ships GPU code for `sm_86`, `sm_89` and `sm_120a`. On a GPU the stage does
-  not support, the run stops with exit 2.
+- The image and video stage ships GPU code for `sm_86`, `sm_89` and `sm_120a`. On a GPU the image and video stage does not support, the run is refused cleanly with code 50 (`the image stage refused this request (status 50)`) before any image or video work.
 - Images and frames add to memory use on top of the model's ≈ 21.7 GiB resident text footprint. No
   memory or speed figure is published for image or video input in this release.
 
 | exit | meaning for image / video runs |
 |---|---|
-| `2` | `--image` or `--video` on a model that does not take it; more than one image or video; `--image` with `--video`; no text prompt; an unsupported or damaged file; frames of different sizes, or fewer than 2 / more than 256 frames; over the size or aspect-ratio budget; or a GPU the stage does not support |
+| `2` | `--image` or `--video` on a model that does not take it; more than one image or video; `--image` with `--video`; no text prompt; an unsupported or damaged file; frames of different sizes, or fewer than 2 / more than 256 frames; or over the size or aspect-ratio budget |
 | `3` | the image file or the video frames folder is missing or unreadable |
 
 ---
@@ -355,7 +356,8 @@ What you can do:
 | `quality … does not fit this N MiB GPU; using balanced` | 35B-A3B `quality` needs about 26 GB or more | accept `balanced`, or use a larger card |
 | CUDA out-of-memory | the model, mode and context do not fit | use a smaller model or `--mode low-memory`; close other GPU programs |
 | `run` / `serve` exits `1` after the engine finished | the engine could not confirm the configuration it ran in; the result is not what you asked for | re-run; report it if it repeats |
-| exit `2` on an `--image` / `--video` run | wrong model, more than one input, no text prompt, an unusable file or frame set, or a GPU the image / video stage does not support | see §1a |
+| exit `2` on an `--image` / `--video` run | wrong model, more than one input, no text prompt, or an unusable file or frame set | see §1a |
+| "the image stage refused this request (status 50)" | the GPU has no image / video stage code (supported: `sm_86`, `sm_89`, `sm_120a`) | use a supported GPU, or text input |
 | `veizik pull` says it "cannot fetch weights for this package" | `pull` has no source for this package's checkpoints | download the Hugging Face snapshot yourself and use `--weights DIR` or `VZ_WEIGHTS` |
 | `veizik inspect` reports the model's weights as missing | expected: the weights are external to the install | nothing to fix; check with `veizik run … --weights DIR` |
 | `veizik models` shows `incomplete (no weights)` | a per-model status label: the weights are external to the install | ignore it; check with `veizik run … --weights DIR` |
