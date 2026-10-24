@@ -4,12 +4,13 @@
 Veizik runs Qwen3.5 / Qwen3.6 language models and Wan2.1 / Wan2.2 video models on Linux with an NVIDIA GPU. It reads the Hugging Face checkpoint you downloaded yourself. No Python, no framework, no CUDA toolkit, no cloud at inference time: only the NVIDIA driver. Prompts, generated text and generated frames stay on the machine.
 
 ## Who this is for
-Developers and teams who run open models on their own NVIDIA hardware and want a sealed native engine instead of a framework stack: a one-shot `run` for language models — and, for video, a scriptable renderer with resume, progress and long-video modes.
+Developers and teams who run open models on their own NVIDIA hardware and want a sealed native engine instead of a framework stack: a one-shot `run`, an interactive `chat`, or a local OpenAI-compatible HTTP server (`serve`) for language models — and, for video, a scriptable renderer with resume, progress and long-video modes plus a render API.
 
 ## What it looks like
 ```text
 $ veizik run qwen35_2b "The capital of France is" --tokens 32
-$ veizik run qwen36_35b_a3b "Explain attention in one paragraph."
+$ veizik chat qwen35_2b
+$ veizik serve qwen35_2b --port 8000          # OpenAI API: POST /v1/chat/completions
 ```
 ```text
 $ ./veizik run wan21_t2v_1_3b --out ./clip --prompt-file prompt.txt
@@ -60,14 +61,18 @@ veizik activate                       # opens veizik.com/activate — approve th
 export VZ_WEIGHTS=/data/models        # a folder holding Qwen3.5-0.8B/ and the other checkpoints you downloaded
 veizik run qwen35_2b "The capital of France is" --tokens 32
 veizik run qwen36_35b_a3b "Explain attention in one paragraph."
+veizik chat qwen35_2b                 # interactive REPL (needs an activated device + weights)
+veizik serve qwen35_2b --port 8000    # OpenAI API: POST /v1/chat/completions (needs activation)
 veizik run wan22_t2v_a14b "A red car driving along a coastal road at sunset." --out ./clip
+veizik serve wan22_t2v_a14b --port 8000   # WAN render API: POST /v1/videos/generations (needs activation)
 veizik uninstall qwen36               # removes an installed package (alias: veizik rm)
 ```
 - Install names are keywords: the Qwen package is `qwen`, `qwen35`, `qwen36` or any of its model keys (`qwen35_0p8b`, `qwen35_2b`, `qwen35_4b`, `qwen35_9b`, `qwen36_35b_a3b`); the WAN package is `wan`, `wan21`, `wan22` or any of its model keys (`wan21_t2v_1_3b`, `wan21_t2v_14b`, `wan22_t2v_a14b`, `wan22_i2v_a14b`). Case does not matter, and `.` or `-` may stand for `_`.
-- `veizik install` downloads the package anonymously from this repository's release, refuses it if its sha256 differs from the published release digest, and extracts it to `${XDG_STATE_HOME:-~/.local/state}/veizik/engines/<model>/`. It refuses to run on macOS. `veizik run` finds the installed engine itself.
+- `veizik install` downloads the package anonymously from this repository's release, refuses it if its sha256 differs from the published release digest, and extracts it to `${XDG_STATE_HOME:-~/.local/state}/veizik/engines/<model>/`. It refuses to run on macOS. `veizik run`, `veizik chat` and `veizik serve` find the installed engine themselves.
+- `veizik chat` is an interactive REPL; `veizik serve` hosts a local HTTP server. For Qwen, `serve` is OpenAI-compatible (`POST /v1/chat/completions`, `/v1/completions`, `/v1/models`) on `127.0.0.1`; for WAN, `serve` is a render API (`POST /v1/videos/generations` with `{"prompt","seed"}` → an output directory). Like `run`, both need an activated device (`veizik activate`) and the model weights before they generate; until the device is activated a request is refused (HTTP 403 / exit 70).
 - Activation ends with one short check generation on `qwen35_0p8b`, so download `Qwen/Qwen3.5-0.8B` first. Download each checkpoint's full Hugging Face snapshot (`config.json`, `tokenizer.json`, `tokenizer_config.json` and every `*.safetensors` file); `veizik pull` cannot fetch weights for these packages.
 - Qwen image and video input (Qwen3.6-35B-A3B only) uses the package's launcher: `<engine folder veizik install prints>/PIPELINE.sh --model qwen36_35b_a3b --image photo.png --prompt "What is in this picture?" --out ./out` (photo.png: any PNG or JPEG of yours).
-- WAN: frames land in `./clip/frames/`. The WAN form of serve is the resident render server in the package (`bin/wan_res`); see [`cuda_deploy/wan/README.md`](cuda_deploy/wan/README.md).
+- WAN: frames land in `./clip/frames/`. The package also ships a resident render server (`bin/wan_res`, driven by a file protocol) in addition to the `veizik serve` HTTP render API; see [`cuda_deploy/wan/README.md`](cuda_deploy/wan/README.md).
 - WAN activation: the WAN package carries no activation tool of its own, so contact support@veizik.com to activate a device for it. Activation does not need the model weights; rendering does. The weights folder needs a prepared `vae/` decoder layout (`vae/manifest.txt`) that the package cannot make from the published checkpoint; contact support@veizik.com for it too. Without activation every WAN GPU stage stops before any compute and the run exits 70 (`VZ_ACTIVATION_REQUIRED`).
 
 ### Manual install (each package's tarball)
