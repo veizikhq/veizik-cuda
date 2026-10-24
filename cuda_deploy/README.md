@@ -68,42 +68,47 @@ where it matters in
 
 ## 2. Install
 
-1. Verify the tarball, then unpack it:
-   ```bash
-   echo "d38f30780b873bac616b5b1e7e54a47ee6e8c9dcb5ad18fe47d86a6457852a54  veizik-qwen-cuda-1.1.0-linux-x86_64.tar" | sha256sum -c -
-   # must print: veizik-qwen-cuda-1.1.0-linux-x86_64.tar: OK
-   tar xf veizik-qwen-cuda-1.1.0-linux-x86_64.tar
-   cd veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86
-   ```
-   The folder name is fixed by the release identity that activation uses — do not rename it. It
-   contains GPU code for all six architectures, whatever its name suggests.
-2. Run the installer:
-   ```bash
-   ./install.sh                  # installs under ~/.local/lib/veizik and puts `veizik` in ~/.local/bin
-   ./install.sh /opt/veizik      # or under a directory of your choice
-   ```
-   The installer checks the `veizik` command against `SHA256SUMS` and the engine against its own
-   integrity seal on a staging copy **before** anything replaces an existing install. The destination
-   may contain only letters, digits and `/ . _ - ~ + @ :` and spaces.
-3. Put `~/.local/bin` on your `PATH` if it is not there, then confirm:
-   ```bash
-   veizik version      # veizik 1.2.0 · backend CUDA
-   veizik doctor       # root, backend, activation service, integrity of the CLI binary
-   ```
+Get the `veizik` command for Linux x86-64 from the latest release of this repository and put it on
+your `PATH`.
+<!-- TODO(CLI lane): exact install line + sha256 -->
 
-If the CLI reports `no Veizik NVIDIA engine here`, run the `veizik` command that `install.sh` put in
-`~/.local/bin` (it pins the install root), or point the CLI at the engine folder yourself:
 ```bash
-export VEIZIK_ROOT=$HOME/.local/lib/veizik/veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86
-veizik doctor
+veizik list                     # the packages you can install
+veizik install qwen3-serve      # this package (release v1.1.0); prints the installed path
+veizik version                  # veizik 1.2.0 · backend CUDA
+export VEIZIK_ROOT=<path printed by install>
+veizik doctor                   # root, backend, activation service, integrity of the CLI binary
 ```
-Running straight from the unpacked folder without installing:
-`VEIZIK_ROOT=$PWD/veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86 ./veizik-$(uname -m) status` (run from
-inside the unpacked folder, where the inner engine folder of the same name sits next to the CLI). The installed engine folder is integrity-checked on every start: do not add, remove or
-edit files inside it, and write outputs elsewhere (`--out`, default `~/veizik-out`).
 
-Uninstall: `veizik deactivate` (see §3), then delete `~/.local/bin/veizik` and the folders under
-`~/.local/lib/veizik` (or your chosen destination).
+- `veizik install` downloads the package anonymously from this repository's release, refuses it if
+  its sha256 differs from the published release digest
+  (`d38f30780b873bac616b5b1e7e54a47ee6e8c9dcb5ad18fe47d86a6457852a54`), and extracts it to
+  `${XDG_STATE_HOME:-~/.local/state}/veizik/engines/<model>/`. It refuses to run on macOS.
+- `veizik uninstall qwen3-serve` (alias `veizik rm`) removes the installed package.
+- The installed engine folder is integrity-checked on every start: do not add, remove or edit files
+  inside it, and write outputs elsewhere (`--out`, default `~/veizik-out`). If the CLI reports
+  `no Veizik NVIDIA engine here`, set `VEIZIK_ROOT` to the path `veizik install` printed.
+
+Uninstall: `veizik deactivate` (see §3), then `veizik uninstall qwen3-serve`.
+
+### Manual install (the package's tarball)
+
+```bash
+echo "d38f30780b873bac616b5b1e7e54a47ee6e8c9dcb5ad18fe47d86a6457852a54  veizik-qwen-cuda-1.1.0-linux-x86_64.tar" | sha256sum -c -
+# must print: veizik-qwen-cuda-1.1.0-linux-x86_64.tar: OK
+tar xf veizik-qwen-cuda-1.1.0-linux-x86_64.tar
+cd veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86
+./install.sh                  # installs under ~/.local/lib/veizik and puts `veizik` in ~/.local/bin
+./install.sh /opt/veizik      # or under a directory of your choice
+```
+
+The folder name is fixed by the release identity that activation uses — do not rename it. It
+contains GPU code for all six architectures, whatever its name suggests. The installer checks the
+`veizik` command against `SHA256SUMS` and the engine against its own integrity seal on a staging copy
+**before** anything replaces an existing install. The destination may contain only letters, digits
+and `/ . _ - ~ + @ :` and spaces. After a manual install the engine folder is
+`~/.local/lib/veizik/veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86` (use it as `VEIZIK_ROOT`); to
+remove it, delete `~/.local/bin/veizik` and the folders under `~/.local/lib/veizik`.
 
 ### System requirements
 
@@ -198,6 +203,8 @@ printf '%s' "$CLI_PASSWORD" | veizik activate --key vzek_… --password-stdin
 ## 4. Quick start
 
 ```bash
+export VEIZIK_ROOT=<path printed by install>   # once per shell (§2)
+
 # one-shot generation (greedy by default); the output is written to gen.txt in ~/veizik-out
 veizik run qwen35_2b "The capital of France is" --tokens 32
 
@@ -224,7 +231,7 @@ veizik chat qwen35_2b
 
 ```bash
 # the package's launcher (INTERFACE.json entry PIPELINE.sh) in the installed engine folder
-export VEIZIK_ROOT=$HOME/.local/lib/veizik/veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86
+export VEIZIK_ROOT=<path printed by install>
 
 # one image (PNG or JPEG) with a text prompt; photo.png stands for your own file
 "$VEIZIK_ROOT"/PIPELINE.sh --model qwen36_35b_a3b --image photo.png --prompt "What is in this picture?" --out ./out

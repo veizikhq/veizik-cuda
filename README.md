@@ -49,42 +49,48 @@ All five models are marked EXPERIMENTAL in the signed model catalogue. Memory is
 The WAN package carries six kernel sets, one per architecture: `sm_80`, `sm_86`, `sm_89`, `sm_90a`, `sm_100a` and `sm_120a`. Every speed figure Veizik states for this bundle was measured on an RTX 3090 (`sm_86`) only; other GPUs run their own kernel sets at speeds not measured.
 
 ## Install and first run
+Get the `veizik` command for Linux x86-64 from the latest release, then let it install the packages.
+<!-- TODO(CLI lane): exact install line + sha256 -->
 
-**Language (Qwen)**
+```bash
+veizik list                           # the packages you can install
+veizik install qwen3-serve            # Qwen package (release v1.1.0)
+veizik install wan2.2-t2v-a14b        # WAN package (release v1.2.0)
+veizik activate                       # opens veizik.com/activate — approve this machine once
+#   no browser (SSH, servers)? create a key under "Browser-free activation" and a password under "CLI password"
+#   on your account page, then:  veizik activate --key vzek_… --password-stdin < pwfile
+export VZ_WEIGHTS=/data/models        # a folder holding Qwen3.5-0.8B/ and the other checkpoints you downloaded
+export VEIZIK_ROOT=<path printed by install>   # the installed Qwen engine folder
+veizik run qwen35_2b "The capital of France is" --tokens 32
+veizik chat qwen35_2b                 # interactive; /exit leaves
+veizik serve qwen35_2b --weights /data/models/Qwen3.5-2B --port 8000   # then POST http://127.0.0.1:8000/v1/chat/completions
+"$VEIZIK_ROOT"/PIPELINE.sh --model qwen36_35b_a3b --image photo.png --prompt "What is in this picture?" --out ./out   # photo.png: any PNG or JPEG of yours
+veizik uninstall qwen3-serve          # removes an installed package (alias: veizik rm)
+```
+- `veizik install` downloads the package anonymously from this repository's release, refuses it if its sha256 differs from the published release digest, and extracts it to `${XDG_STATE_HOME:-~/.local/state}/veizik/engines/<model>/`. It prints the installed path. It refuses to run on macOS.
+- Activation ends with one short check generation on `qwen35_0p8b`, so download `Qwen/Qwen3.5-0.8B` first. Download each checkpoint's full Hugging Face snapshot (`config.json`, `tokenizer.json`, `tokenizer_config.json` and every `*.safetensors` file); `veizik pull` cannot fetch weights for these packages.
+- WAN: the package runs through its own launcher in the installed folder: `cd <path printed by install>` and then `./veizik run wan22_t2v_a14b --out ~/wan-out --prompt-file prompt.txt` with `VZ_WEIGHTS` pointing at the model's weights. Its resident render server (`bin/wan_res`) is the WAN form of serve; see [`cuda_deploy/wan/README.md`](cuda_deploy/wan/README.md).
+- WAN activation: the WAN package carries no activation tool of its own, so contact support@veizik.com to activate a device for it. Activation does not need the model weights; rendering does. The weights folder needs a prepared `vae/` decoder layout (`vae/manifest.txt`) that the package cannot make from the published checkpoint; contact support@veizik.com for it too. Without activation every WAN GPU stage stops before any compute and the run exits 70 (`VZ_ACTIVATION_REQUIRED`).
+
+### Manual install (each package's tarball)
+**Qwen (v1.1.0)**
 ```bash
 curl -LO https://github.com/veizikhq/veizik-cuda/releases/download/v1.1.0/veizik-qwen-cuda-1.1.0-linux-x86_64.tar
 echo "d38f30780b873bac616b5b1e7e54a47ee6e8c9dcb5ad18fe47d86a6457852a54  veizik-qwen-cuda-1.1.0-linux-x86_64.tar" | sha256sum -c -
 tar xf veizik-qwen-cuda-1.1.0-linux-x86_64.tar
 cd veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86   # the folder name is fixed by the release identity; do not rename it
 ./install.sh                          # checks SHA256SUMS and the engine's own seal, then installs under ~/.local/lib/veizik
-export PATH="$HOME/.local/bin:$PATH"
-export VZ_WEIGHTS=/data/models        # a folder holding Qwen3.5-0.8B/ and the other checkpoints you downloaded
-veizik activate                       # opens veizik.com/activate — approve this machine once
-#   no browser (SSH, servers)? create a key under "Browser-free activation" and a password under "CLI password"
-#   on your account page, then:  veizik activate --key vzek_… --password-stdin < pwfile
-veizik run qwen35_2b "The capital of France is" --tokens 32
-veizik chat qwen35_2b                 # interactive; /exit leaves
-export VEIZIK_ROOT=$HOME/.local/lib/veizik/veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86   # the installed engine folder
-"$VEIZIK_ROOT"/PIPELINE.sh --model qwen36_35b_a3b --image photo.png --prompt "What is in this picture?" --out ./out   # photo.png: any PNG or JPEG of yours
-"$VEIZIK_ROOT"/PIPELINE.sh --model qwen36_35b_a3b --video ./frames --video-fps 2 --prompt-file question.txt --out ./out   # ./frames: 2–256 same-size PNG/JPEG frames
-veizik serve qwen35_2b --weights /data/models/Qwen3.5-2B --port 8000   # then POST http://127.0.0.1:8000/v1/chat/completions
 ```
-Activation ends with one short check generation on `qwen35_0p8b`, so download `Qwen/Qwen3.5-0.8B` first. Download each checkpoint's full Hugging Face snapshot (`config.json`, `tokenizer.json`, `tokenizer_config.json` and every `*.safetensors` file); `veizik pull` cannot fetch weights for this package.
-
-**Video (WAN)**
+**WAN (v1.2.0)**
 ```bash
 curl -LO https://github.com/veizikhq/veizik-cuda/releases/download/v1.2.0/veizik-wan-1.2.0-linux-x86_64.tar
 echo "8a594e6587db6259175936d60e1604a2156d4835e72dcc458dcc685783e8b027  veizik-wan-1.2.0-linux-x86_64.tar" | sha256sum -c -
 tar xf veizik-wan-1.2.0-linux-x86_64.tar
 cd veizik-wan-1.2.0-linux-x86_64
 bin/vzseal "$PWD"                     # integrity check by hand; prints VZSEAL OK <n>
-export VZ_WEIGHTS=/data/models/Wan2.1-T2V-1.3B   # transformer/ text_encoder/ tokenizer/ vae/
-./veizik run wan21_t2v_1_3b --out ~/wan-out --prompt-file prompt.txt
 ```
-Activating a device for the WAN package: the WAN package carries no activation tool of its own, so contact support@veizik.com to activate a device for it. Activation does not need the model weights; rendering does. The weights folder needs a prepared `vae/` decoder layout (`vae/manifest.txt`) that the package cannot make from the published checkpoint; contact support@veizik.com for it too.
-The WAN package runs from the folder you unpacked; it has no installer. Its GPU code opens only on a device activated for this release: without activation every GPU stage stops before any compute and the run exits 70 (`VZ_ACTIVATION_REQUIRED`). The weights folder layout and every option are in [`cuda_deploy/wan/README.md`](cuda_deploy/wan/README.md).
 
-What needs the network: creating the account, activating the device and renewing its lease. Generation itself does not.
+What needs the network: installing a package, creating the account, activating the device and renewing its lease. Generation itself does not.
 
 ## Measured on this build
 - Qwen: the published rows and the rows committed in [`cuda_deploy/bench/`](cuda_deploy/bench/) were measured on 1.0.0 builds of this package (2026-10-21), with text input. They were not re-measured on 1.1.0, and the board marks every row measured on an earlier build. No figure is published for image or video input. Board: https://veizik.com/benchmarks

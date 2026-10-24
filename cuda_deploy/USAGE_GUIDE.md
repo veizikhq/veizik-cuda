@@ -53,7 +53,7 @@ folder's `INTERFACE.json`) can look at one image or one short video together wit
 (`serve` answers an image or other non-text message part with 400 `unsupported_content_part`).
 
 ```bash
-export VEIZIK_ROOT=$HOME/.local/lib/veizik/veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86   # the installed engine folder
+export VEIZIK_ROOT=<path printed by install>   # the installed engine folder (veizik install qwen3-serve)
 
 # one image; photo.png stands for your own PNG or JPEG file
 "$VEIZIK_ROOT"/PIPELINE.sh --model qwen36_35b_a3b --image photo.png --prompt "What is in this picture?" --out ./out
@@ -341,7 +341,7 @@ What you can do:
 
 | symptom | meaning | fix |
 |---|---|---|
-| `no Veizik NVIDIA engine here (<root>)` (exit 6) | the CLI cannot find the engine folder | run the `veizik` command from `~/.local/bin`, or `export VEIZIK_ROOT=<install>/veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86` |
+| `no Veizik NVIDIA engine here (<root>)` (exit 6) | the CLI cannot find the engine folder | `export VEIZIK_ROOT=<path printed by veizik install>` (after a manual install: `<install>/veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86`) |
 | `activation … NOT confirmed` / "model weights are not on this machine yet" (exit 6) | the lease installed but the check generation could not run | get the `Qwen3.5-0.8B` checkpoint, set `VZ_WEIGHTS`, run `veizik activate` again |
 | exit `70` `VZ_ACTIVATION_REQUIRED` | no key, no lease, or the lease expired | `veizik activate` (or `veizik activate --refresh`) |
 | exit `74` `VZ_ENTITLEMENT_REFUSED` | a lease is present but was not issued for this package on this device | `veizik activate --reapprove`; make sure the installed engine folder was not renamed |
