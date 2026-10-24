@@ -49,8 +49,8 @@ All five models are marked EXPERIMENTAL in the signed model catalogue. Memory is
 The WAN package carries six kernel sets, one per architecture: `sm_80`, `sm_86`, `sm_89`, `sm_90a`, `sm_100a` and `sm_120a`. Every speed figure Veizik states for this bundle was measured on an RTX 3090 (`sm_86`) only; other GPUs run their own kernel sets at speeds not measured.
 
 ## Install and first run
-Get the `veizik` command for Linux x86-64 from the latest release, then let it install the packages.
-<!-- TODO(CLI lane): exact install line + sha256 -->
+Get the `veizik` command for Linux x86-64 from the [latest release](https://github.com/veizikhq/veizik-cuda/releases/latest), then let it install the packages.
+
 
 ```bash
 veizik list                           # the packages you can install

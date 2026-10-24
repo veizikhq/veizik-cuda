@@ -68,9 +68,9 @@ where it matters in
 
 ## 2. Install
 
-Get the `veizik` command for Linux x86-64 from the latest release of this repository and put it on
+Get the `veizik` command for Linux x86-64 from the [latest release](https://github.com/veizikhq/veizik-cuda/releases/latest) of this repository and put it on
 your `PATH`.
-<!-- TODO(CLI lane): exact install line + sha256 -->
+
 
 ```bash
 veizik list                     # the packages you can install
