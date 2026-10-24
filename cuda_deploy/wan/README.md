@@ -131,8 +131,8 @@ export VZ_WEIGHTS=/data/models/Wan2.1-T2V-1.3B
 | `--image FILE` | raw 8-bit RGB | image-to-video first frame (below) |
 | `--extend DIR` | a previous I2V `--out` | continue that render: its last frame becomes this render's `--image` (new `--out`, same size) |
 | `--png-step N` | 0 – 65535 | write every N-th frame as PNG (0 = none; frames stay in `work/frames.bin`) |
-| `--lora FILE`, `--lora-scale s` | safetensors; 0 – 4 | merge a LoRA at load into the (high-noise / only) transformer: W += s · B·A |
-| `--lora-check yes` | | report LoRA tensors that match no weight |
+| `--lora FILE`, `--lora-scale s` | | accepted but not supported in this release; do not rely on it |
+| `--lora-check yes` | | accepted but not supported in this release; do not rely on it |
 | `--det-vae yes` | | deterministic VAE encode / decode (§8) |
 | `--gemm-fuse 15` | 0 – 15 | fused GEMM epilogues, bit-identical |
 
@@ -286,6 +286,8 @@ GPUs run their own kernel sets at speeds not measured.
 ## 12. Not in this package
 
 - `--wcache` (weight cache) and the `--lora-xkv-*` options are disabled; they are refused (exit 2).
+- `--lora`, `--lora-scale` and `--lora-check` are accepted but not supported in this release; do not
+  rely on them.
 - `--lora2` (a LoRA for the low-noise expert), `--i2v-mask-held`, `--i2v-svi` and `--i2v-motion` are
   refused (exit 2).
 - `@gen` anchors in a story are refused.

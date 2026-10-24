@@ -68,28 +68,29 @@ where it matters in
 
 ## 2. Install
 
-Get the `veizik` command for Linux x86-64 from the [latest release](https://github.com/veizikhq/veizik-cuda/releases/latest) of this repository and put it on
-your `PATH`.
-
-
 ```bash
+curl -fsSL https://veizik.com/install.sh | sh   # installs the veizik command only, sha-checked against this repository's SHA256SUMS
+export PATH="$HOME/.local/bin:$PATH"
 veizik list                     # the packages you can install
-veizik install qwen3-serve      # this package (release v1.1.0); prints the installed path
+veizik install qwen36           # this package (release v1.1.0)
 veizik version                  # veizik 1.2.0 · backend CUDA
-export VEIZIK_ROOT=<path printed by install>
 veizik doctor                   # root, backend, activation service, integrity of the CLI binary
 ```
 
+- The install script installs only the `veizik` command, sha-checked against this repository's
+  `SHA256SUMS`; on macOS it points you to the Apple disk image instead.
+- Install names are keywords: the Qwen package is `qwen`, `qwen35`, `qwen36` or any of its model keys (`qwen35_0p8b`, `qwen35_2b`, `qwen35_4b`, `qwen35_9b`, `qwen36_35b_a3b`); the WAN package is `wan`, `wan21`, `wan22` or any of its model keys (`wan21_t2v_1_3b`, `wan21_t2v_14b`, `wan22_t2v_a14b`, `wan22_i2v_a14b`). Case does not matter, and `.` or `-` may stand for `_`.
 - `veizik install` downloads the package anonymously from this repository's release, refuses it if
   its sha256 differs from the published release digest
   (`d38f30780b873bac616b5b1e7e54a47ee6e8c9dcb5ad18fe47d86a6457852a54`), and extracts it to
-  `${XDG_STATE_HOME:-~/.local/state}/veizik/engines/<model>/`. It refuses to run on macOS.
-- `veizik uninstall qwen3-serve` (alias `veizik rm`) removes the installed package.
+  `${XDG_STATE_HOME:-~/.local/state}/veizik/engines/<model>/`. It refuses to run on macOS. `veizik run`,
+  `chat` and `serve` find the installed engine themselves.
+- `veizik uninstall qwen36` (alias `veizik rm`) removes the installed package.
 - The installed engine folder is integrity-checked on every start: do not add, remove or edit files
   inside it, and write outputs elsewhere (`--out`, default `~/veizik-out`). If the CLI reports
-  `no Veizik NVIDIA engine here`, set `VEIZIK_ROOT` to the path `veizik install` printed.
+  `no Veizik NVIDIA engine here`, set `VEIZIK_ROOT` to the engine folder `veizik install` printed.
 
-Uninstall: `veizik deactivate` (see §3), then `veizik uninstall qwen3-serve`.
+Uninstall: `veizik deactivate` (see §3), then `veizik uninstall qwen36`.
 
 ### Manual install (the package's tarball)
 
@@ -203,10 +204,9 @@ printf '%s' "$CLI_PASSWORD" | veizik activate --key vzek_… --password-stdin
 ## 4. Quick start
 
 ```bash
-export VEIZIK_ROOT=<path printed by install>   # once per shell (§2)
-
 # one-shot generation (greedy by default); the output is written to gen.txt in ~/veizik-out
 veizik run qwen35_2b "The capital of France is" --tokens 32
+veizik run qwen36_35b_a3b "Explain attention in one paragraph."
 
 # a larger model, a named mode, a prompt from a file, a chosen output folder
 veizik run qwen35_9b --prompt-file question.txt --mode balanced --tokens 256 --out ./out
@@ -231,7 +231,7 @@ veizik chat qwen35_2b
 
 ```bash
 # the package's launcher (INTERFACE.json entry PIPELINE.sh) in the installed engine folder
-export VEIZIK_ROOT=<path printed by install>
+export VEIZIK_ROOT=<engine folder veizik install prints>
 
 # one image (PNG or JPEG) with a text prompt; photo.png stands for your own file
 "$VEIZIK_ROOT"/PIPELINE.sh --model qwen36_35b_a3b --image photo.png --prompt "What is in this picture?" --out ./out

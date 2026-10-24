@@ -639,7 +639,7 @@ in this release. `service rotate` is not supported on Linux (journald owns the l
 
 | variable | effect |
 |---|---|
-| `VEIZIK_ROOT` | the engine folder the CLI uses (the `veizik` command from `install.sh` sets it for you) |
+| `VEIZIK_ROOT` | the engine folder the CLI uses; normally not needed (the CLI finds an engine installed with `veizik install`, and the `veizik` command from a manual `install.sh` sets it); also used to call the package's launcher for image and video input |
 | `VZ_WEIGHTS` | where to look for model weights (`run`, `bench`, `serve`, and the activation check) |
 | `VEIZIK_CACHE` | the `veizik pull` cache root, searched by `run` and `serve` |
 | `HF_HUB_CACHE`, `HF_HOME` | where the Hugging Face cache lives (searched by `run` and `bench`) |
