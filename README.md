@@ -55,7 +55,7 @@ curl -fsSL https://veizik.com/install.sh | sh   # installs the veizik command on
 export PATH="$HOME/.local/bin:$PATH"
 veizik list                           # model engines: installed and available
 veizik install qwen36                 # Qwen package (release v1.1.0)
-veizik install wan22                  # WAN package (release v1.2.0)
+veizik install wan22                  # WAN package (release v1.2.1)
 veizik activate                       # opens veizik.com/activate — approve this machine once
 #   no browser (SSH, servers)? create a key under "Browser-free activation" and a password under "CLI password"
 #   on your account page, then:  veizik activate --key vzek_… --password-stdin < pwfile
@@ -83,7 +83,7 @@ veizik uninstall qwen36               # removes an installed package (alias: vei
 ### Checksums (published release digests)
 `veizik install` downloads each package and verifies it against its published release digest automatically — there is no separate manual install step. For reference (e.g. to verify a direct download), the published downloads and digests are:
 - `veizik-qwen-cuda-1.1.0-linux-x86_64.tar` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.1.0/veizik-qwen-cuda-1.1.0-linux-x86_64.tar — sha256 `6217d3c1befd2f9fca3960b9d434efc2ae1b3677db4c57e3e451a91b154e6102`
-- `veizik-wan-1.2.0-linux-x86_64.tar` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.2.0/veizik-wan-1.2.0-linux-x86_64.tar — sha256 `8a594e6587db6259175936d60e1604a2156d4835e72dcc458dcc685783e8b027`
+- `veizik-wan-1.2.1-linux-x86_64.tar` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.2.1/veizik-wan-1.2.1-linux-x86_64.tar — sha256 `3814a7a8aa16552b3074f6bfaec83b9cfe7196df86c723cd9111d7342f2410cd`
 
 What needs the network: installing a package, creating the account, activating the device and renewing its lease. Generation itself does not.
 
@@ -111,5 +111,5 @@ https://veizik.com/benchmarks — every published row names the GPU, model, mode
 **veizik-qwen-cuda-1.1.0-linux-x86_64.tar** (v1.1.0, sha256 `6217d3c1…`, 57,012,224 B)
 Top folder `veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86/`: README.txt 1,927 B · install.sh 3,882 B · SHA256SUMS 207,093 B · veizik-x86_64 1,534,320 B · veizik-aarch64 994,728 B · PTXSEAL.prov 124 B · PTXSEAL.prov.sig 64 B · the sealed engine folder of the same name: INTERFACE.json 10,540 B · PIPELINE.sh 108 B · SHA256SUMS.vz 132,541 B · models.json 644 B · models.json.sig 64 B · bin/ (8 files, including the image and video runners) · models/ (5 model folders, per-model metadata) · GPU code, 251 files per architecture: `ptx/` (sm_80) · `ptx_sm86/` · `ptx_sm89/` · `ptx_sm90a/` · `ptx_sm100a/` · `ptx_sm120a/` · image and video stage GPU code, 16 files per architecture: `ptx_vis_sm86/` · `ptx_vis_sm89/` · `ptx_vis_sm120a/`. 1,583 files in all. Verify with `sha256sum -c SHA256SUMS` inside the top folder.
 
-**veizik-wan-1.2.0-linux-x86_64.tar** (v1.2.0, sha256 `8a594e65…`, 7,112,192 B)
-PTXSEAL.prov 124 B · PTXSEAL.prov.sig 64 B · folder `veizik-wan-1.2.0-linux-x86_64/`: veizik 4,329 B · PIPELINE.sh 45,770 B · README.txt 8,361 B · MODEL.txt 418 B · STAGES.txt 1,239 B · INTERFACE.json 22,507 B · manifest.json 416 B · CONFORMANCE.json 4,181 B · REPRO.md 679 B · PROVENANCE.txt 483 B · THIRD_PARTY_NOTICES.txt 1,070 B · SHA256SUMS.vz 14,114 B · inject.sh 3,390 B · s6_segments.sh 998 B · vz_modes.conf 312 B · bin/ (12 files) · bin_seam/ (1 file) · lib/ (15 libraries) · models/ (model folders: meta.json, default prompt and negative prompt) · GPU kernel sets: `ptx/` 17 · `ptx_89/` 17 · `ptx_a80/` 18 · `ptx_h90/` 22 · `ptx_b100a/` 20 · `ptx_b120/` 17 files. 172 files in all. Verify with `bin/vzseal <folder>` (prints `VZSEAL OK <n>`).
+**veizik-wan-1.2.1-linux-x86_64.tar** (v1.2.1, sha256 `3814a7a8…`, 6,922,240 B)
+PTXSEAL.prov 124 B · PTXSEAL.prov.sig 64 B · folder `veizik-wan-1.2.1-linux-x86_64/`: veizik 4,329 B · PIPELINE.sh 45,770 B · README.txt 8,361 B · MODEL.txt 418 B · STAGES.txt 1,239 B · INTERFACE.json 22,507 B · manifest.json 416 B · CONFORMANCE.json 4,181 B · REPRO.md 679 B · PROVENANCE.txt 483 B · THIRD_PARTY_NOTICES.txt 1,070 B · SHA256SUMS.vz 14,114 B · inject.sh 3,390 B · s6_segments.sh 998 B · vz_modes.conf 312 B · bin/ (12 files) · bin_seam/ (1 file) · lib/ (15 libraries) · models/ (model folders: meta.json, default prompt and negative prompt) · GPU kernel sets: `ptx/` 17 · `ptx_89/` 17 · `ptx_a80/` 18 · `ptx_h90/` 22 · `ptx_b100a/` 20 · `ptx_b120/` 17 files. 172 files in all. Verify with `bin/vzseal <folder>` (prints `VZSEAL OK <n>`).
