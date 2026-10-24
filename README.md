@@ -4,7 +4,7 @@
 Veizik runs Qwen3.5 / Qwen3.6 language models and Wan2.1 / Wan2.2 video models on Linux with an NVIDIA GPU. It reads the Hugging Face checkpoint you downloaded yourself. No Python, no framework, no CUDA toolkit, no cloud at inference time: only the NVIDIA driver. Prompts, generated text and generated frames stay on the machine.
 
 ## Who this is for
-Developers and teams who run open models on their own NVIDIA hardware and want a sealed native engine instead of a framework stack: a one-shot `run`, an interactive `chat`, or a local OpenAI-compatible HTTP server (`serve`) for language models — and, for video, a scriptable renderer with resume, progress and long-video modes plus a render API.
+Developers and teams who run open models on their own NVIDIA hardware and want a sealed native engine instead of a framework stack: a one-shot `run`, an interactive `chat`, or a local HTTP server (`serve`) — an OpenAI-compatible API for language models and a render API for video — with the same commands for every model.
 
 ## What it looks like
 ```text
@@ -13,8 +13,9 @@ $ veizik chat qwen35_2b
 $ veizik serve qwen35_2b --port 8000          # OpenAI API: POST /v1/chat/completions
 ```
 ```text
-$ ./veizik run wan21_t2v_1_3b --out ./clip --prompt-file prompt.txt
-$ ls ./clip/frames      # frame_00000.png ...
+$ veizik run wan21_t2v_1_3b "A red car driving along a coastal road at sunset." --out $HOME/clip
+$ ls $HOME/clip/frames      # frame_00000.png ...
+$ veizik serve wan21_t2v_1_3b --port 8000      # render API: POST /v1/videos/generations
 ```
 
 ## Supported environment and models
@@ -47,12 +48,12 @@ All five models are marked EXPERIMENTAL in the signed model catalogue. Memory is
 The WAN package carries six kernel sets, one per architecture: `sm_80`, `sm_86`, `sm_89`, `sm_90a`, `sm_100a` and `sm_120a`. Every speed figure Veizik states for this bundle was measured on an RTX 3090 (`sm_86`) only; other GPUs run their own kernel sets at speeds not measured.
 
 ## Install and first run
-Step 1 installs the `veizik` command; it then installs the packages. On macOS the script points you to the Apple disk image instead.
+Step 1 installs the `veizik` command (the latest release); it then installs the packages. On macOS the script points you to the Apple disk image instead.
 
 ```bash
 curl -fsSL https://veizik.com/install.sh | sh   # installs the veizik command only, sha-checked against this repository's SHA256SUMS
 export PATH="$HOME/.local/bin:$PATH"
-veizik list                           # the packages you can install
+veizik list                           # model engines: installed and available
 veizik install qwen36                 # Qwen package (release v1.1.0)
 veizik install wan22                  # WAN package (release v1.2.0)
 veizik activate                       # opens veizik.com/activate — approve this machine once
@@ -63,17 +64,21 @@ veizik run qwen35_2b "The capital of France is" --tokens 32
 veizik run qwen36_35b_a3b "Explain attention in one paragraph."
 veizik chat qwen35_2b                 # interactive REPL (needs an activated device + weights)
 veizik serve qwen35_2b --port 8000    # OpenAI API: POST /v1/chat/completions (needs activation)
-veizik run wan22_t2v_a14b "A red car driving along a coastal road at sunset." --out ./clip
+veizik run wan22_t2v_a14b "A red car driving along a coastal road at sunset." --out $HOME/clip
 veizik serve wan22_t2v_a14b --port 8000   # WAN render API: POST /v1/videos/generations (needs activation)
+veizik ps                             # resident servers running here
+veizik stop 8000                      # stop the server on a port (or: veizik stop all)
 veizik uninstall qwen36               # removes an installed package (alias: veizik rm)
 ```
+- Every model answers the same commands: `run`, `chat`, `serve`, `ps`, `stop`, `models`, `list`, `install`, `update`, `uninstall` / `rm`, `pull`, `hf`, `remove`, `convert`, `inspect`, `bench`, `cache`, `config`, `completion`, `status`, `activate`, `devices`, `device-id`, `doctor` and `version`; `veizik <command> --help` gives the detail and [`cuda_deploy/CLI_USAGE.md`](cuda_deploy/CLI_USAGE.md) is the full reference. `veizik update` and `veizik convert` exist but are not functional yet.
 - Install names are keywords: the Qwen package is `qwen`, `qwen35`, `qwen36` or any of its model keys (`qwen35_0p8b`, `qwen35_2b`, `qwen35_4b`, `qwen35_9b`, `qwen36_35b_a3b`); the WAN package is `wan`, `wan21`, `wan22` or any of its model keys (`wan21_t2v_1_3b`, `wan21_t2v_14b`, `wan22_t2v_a14b`, `wan22_i2v_a14b`). Case does not matter, and `.` or `-` may stand for `_`.
 - `veizik install` downloads the package anonymously from this repository's release, refuses it if its sha256 differs from the published release digest, and extracts it to `${XDG_STATE_HOME:-~/.local/state}/veizik/engines/<model>/`. It refuses to run on macOS. `veizik run`, `veizik chat` and `veizik serve` find the installed engine themselves.
-- `veizik chat` is an interactive REPL; `veizik serve` hosts a local HTTP server. For Qwen, `serve` is OpenAI-compatible (`POST /v1/chat/completions`, `/v1/completions`, `/v1/models`) on `127.0.0.1`; for WAN, `serve` is a render API (`POST /v1/videos/generations` with `{"prompt","seed"}` → an output directory). Like `run`, both need an activated device (`veizik activate`) and the model weights before they generate; until the device is activated a request is refused (HTTP 403 / exit 70).
-- Activation ends with one short check generation on `qwen35_0p8b`, so download `Qwen/Qwen3.5-0.8B` first. Download each checkpoint's full Hugging Face snapshot (`config.json`, `tokenizer.json`, `tokenizer_config.json` and every `*.safetensors` file); `veizik pull` cannot fetch weights for these packages.
-- Qwen image and video input (Qwen3.6-35B-A3B only) uses the package's launcher: `<engine folder veizik install prints>/PIPELINE.sh --model qwen36_35b_a3b --image photo.png --prompt "What is in this picture?" --out ./out` (photo.png: any PNG or JPEG of yours).
-- WAN: frames land in `./clip/frames/`. The package also ships a resident render server (`bin/wan_res`, driven by a file protocol) in addition to the `veizik serve` HTTP render API; see [`cuda_deploy/wan/README.md`](cuda_deploy/wan/README.md).
-- WAN activation: the WAN package carries no activation tool of its own, so contact support@veizik.com to activate a device for it. Activation does not need the model weights; rendering does. The weights folder needs a prepared `vae/` decoder layout (`vae/manifest.txt`) that the package cannot make from the published checkpoint; contact support@veizik.com for it too. Without activation every WAN GPU stage stops before any compute and the run exits 70 (`VZ_ACTIVATION_REQUIRED`).
+- `veizik chat` is an interactive REPL; `veizik serve` hosts a local HTTP server on `127.0.0.1` (omit the model to serve every installed one). For Qwen, `serve` is OpenAI-compatible (`POST /v1/chat/completions`, `/v1/completions`, `/v1/models`, health endpoints; `--require-auth --keyfile` requires an API key); for WAN, `serve` is a render API (`POST /v1/videos/generations` with `{"prompt","seed"}` → a folder of PNG frames; `GET /health`, `GET /v1/models`). `run`, `chat` and `serve` generate only after `veizik activate` **and** with the model weights present (`VZ_WEIGHTS`, `--weights DIR` where the command takes it, or the `veizik pull` cache); until the device is activated a request is refused (HTTP 403 / exit 70).
+- One flag vocabulary for `run`: `--out`, `--name`, `--resume`, `--resume-from REF`, `--checkpoint-every` and `--vzq FILE` work for every model; the rest are forwarded only if the engine accepts them (Qwen: `--seed --steps --mode --temperature --top-p --top-k --tokens --max-tokens --ignore-eos`, plus `--image --video --image-max-pixels --video-fps --video-max-pixels` on Qwen3.6-35B-A3B; WAN: `--steps --frames --width --height --seed --png-step --guidance --guidance2 --shift --mode --det-vae --image --neg-file`), and a flag the engine does not accept is refused with `<flag> does not apply to this model.` `--resume-from REF` resumes that run's folder; `--vzq` loads sealed `.vzq` weights. See [`cuda_deploy/CLI_USAGE.md`](cuda_deploy/CLI_USAGE.md).
+- Activation ends with one short check generation on `qwen35_0p8b`, so download `Qwen/Qwen3.5-0.8B` first. Download each checkpoint's full Hugging Face snapshot (`config.json`, `tokenizer.json`, `tokenizer_config.json` and every `*.safetensors` file), or fetch weights with `veizik pull <model>` (`veizik hf login` first for a gated model).
+- Qwen image and video input (Qwen3.6-35B-A3B only): `veizik run qwen36_35b_a3b "What is in this picture?" --image photo.png` (photo.png: any PNG or JPEG of yours), or `--video ./frames` (a folder of frames) with `--video-fps`.
+- WAN: frames land in `<run folder>/frames/`. `veizik serve` answers with the same frames through the HTTP render API; see [`cuda_deploy/wan/README.md`](cuda_deploy/wan/README.md).
+- WAN activation: one `veizik activate` approval covers every installed model, WAN included. Without activation every WAN GPU stage stops before any compute and the run exits 70 (`VZ_ACTIVATION_REQUIRED`). The weights folder needs a prepared `vae/` decoder layout (`vae/manifest.txt`) that the package cannot make from the published checkpoint; contact support@veizik.com for it.
 
 ### Manual install (each package's tarball)
 **Qwen (v1.1.0)**
@@ -104,9 +109,9 @@ What needs the network: installing a package, creating the account, activating t
 https://veizik.com/benchmarks — every published row names the GPU, model, mode, operating point, run count and spread. Rows measured on an earlier build are marked. The Qwen rows, the per-run lines they were computed from, and a kit that re-measures them on your GPU through the installed CLI are in [`cuda_deploy/bench/`](cuda_deploy/bench/) — start at [`REPRODUCIBILITY.md`](cuda_deploy/bench/REPRODUCIBILITY.md). The WAN bundle's `REPRO.md` describes how to check a render against `CONFORMANCE.json`.
 
 ## Limits, troubleshooting, terms
-- Qwen: Qwen3.6-35B-A3B in `quality` mode needs about 26 GB or more and did not complete on a 32 GB card in validation; use `balanced` or `fast`. Image and video input is available through the package's launcher for Qwen3.6-35B-A3B only, one image or one video per run. Not in this release: LoRA adapters, audio input, tool calling, embeddings and `logprobs` over HTTP, a weight converter, and weight downloads with `veizik pull`.
-- WAN: a run that is interrupted continues with `--resume yes` and the same `--out`, bit-identical to an uninterrupted render. Long videos render window by window (`--stream yes --window-frames 81`, optionally driven by a `--story` file). A story with `@gen` anchors is refused. `--wcache` is disabled in this bundle.
-- WAN serve: the package includes a resident render server (`bin/wan_res`). One process and one GPU context render request after request; results are bit-identical to `./veizik run`; every request re-checks the licence, and a request can be preempted at a step boundary and resumed. It is driven by a file protocol (`WAN_RES_GO=<file>`, see [`cuda_deploy/wan/README.md`](cuda_deploy/wan/README.md) §8), not HTTP.
+- Qwen: Qwen3.6-35B-A3B in `quality` mode needs about 26 GB or more and did not complete on a 32 GB card in validation; use `balanced` or `fast`. Image and video input is available for Qwen3.6-35B-A3B only (`veizik run … --image` / `--video`), one image or one video per run. Not in this release: LoRA adapters, audio input, tool calling, embeddings and `logprobs` over HTTP, and a weight converter (`veizik convert` exists but does nothing useful yet; so does `veizik update`).
+- WAN: a run that is interrupted continues with `veizik run … --resume` and the same `--out` (or `--resume-from REF`), bit-identical to an uninterrupted render. Long videos render window by window through the package's own launcher (`--stream yes --window-frames 81`, optionally driven by a `--story` file; see [`cuda_deploy/wan/README.md`](cuda_deploy/wan/README.md) §6). A story with `@gen` anchors is refused. `--wcache` is disabled in this bundle.
+- WAN serve: `veizik serve` exposes a render API (`POST /v1/videos/generations` with a prompt and seed → a folder of PNG frames; `/health`, `/v1/models`) on a resident render server (`bin/wan_res`). One process and one GPU context render request after request; results are bit-identical to a one-shot `run`; every request re-checks the licence, and a request can be preempted at a step boundary and resumed. It needs `veizik activate` and the weights, like `run`. See [`cuda_deploy/wan/README.md`](cuda_deploy/wan/README.md) §8.
 - WAN provenance: every generated frame carries a v1 provenance mark — an in-pixel watermark plus XMP `DigitalSourceType=trainedAlgorithmicMedia`. The mark holds no prompt, device, path or account data.
 - Integrity: both engines check their own files at every start. A changed, added or missing file stops the run with exit code 4; reinstall from a verified tarball. Do not add files inside the installed or unpacked engine folder; write output elsewhere.
 - Licensing: a device runs only with a valid lease. Exit 70 means activation is required (`veizik activate`); exit 74 means the lease present was not issued for this package on this device, or does not enable what was asked.

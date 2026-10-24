@@ -10,7 +10,7 @@ time. You supply the weights; prompts and frames stay on the machine.
 - Install: `echo "8a594e6587db6259175936d60e1604a2156d4835e72dcc458dcc685783e8b027  veizik-wan-1.2.0-linux-x86_64.tar" | sha256sum -c - && tar xf veizik-wan-1.2.0-linux-x86_64.tar && cd veizik-wan-1.2.0-linux-x86_64` (full guide: [README](README.md))
 - Licence: install + evaluation free; production use licensed. Terms: Veizik Terms of Service (https://veizik.com/terms) and the Veizik distribution licence ([`LICENSE`](../../LICENSE)); third-party works in [`NOTICE.md`](../../NOTICE.md).
 
-Activating a device for the WAN package: the WAN package carries no activation tool of its own, so contact support@veizik.com to activate a device for it. Activation does not need the model weights; rendering does. The weights folder needs a prepared `vae/` decoder layout (`vae/manifest.txt`) that the package cannot make from the published checkpoint; contact support@veizik.com for it too.
+Install and run with the `veizik` command (CLI 1.4.3): `veizik install wan22`, `veizik activate` (one approval covers every installed model), then `veizik run wan22_t2v_a14b "<prompt>" --out $HOME/clip`; the full command reference is [`../CLI_USAGE.md`](../CLI_USAGE.md). A package unpacked by hand carries no activation tool of its own; contact support@veizik.com to activate it. Activation does not need the model weights; rendering does. The weights folder needs a prepared `vae/` decoder layout (`vae/manifest.txt`) that the package cannot make from the published checkpoint; contact support@veizik.com for it too.
 
 ## In this release
 
@@ -22,11 +22,11 @@ Activating a device for the WAN package: the WAN package carries no activation t
   window's; a story file defines characters, styles, visual memories and cuts; `./inject.sh` adds a
   line to a running stream.
 - Resume and preemption: a one-shot render checkpoints every step and continues bit-identically with
-  `--resume yes`; creating `work/preempt` stops it at the next step boundary with exit 75.
+  `--resume yes` (`veizik run … --resume`); creating `work/preempt` stops it at the next step boundary with exit 75.
 - Progress: `work/progress` holds one JSON line (`vz_progress/1`), replaced atomically after every
   stage and every denoise step.
-- Resident daemon `bin/wan_res`: one process renders request after request, bit-identical to
-  `./veizik run`, re-checking the licence on every request.
+- Resident server `bin/wan_res`: one process renders request after request, bit-identical to
+  `./veizik run`, re-checking the licence on every request; `veizik serve` puts a render API in front of it.
 - Provenance mark v1: every generated frame carries an in-pixel watermark plus XMP
   `DigitalSourceType=trainedAlgorithmicMedia`. It holds no prompt, device, path or account data.
 - Integrity: `bin/vzseal` re-hashes every file before any stage runs; a changed, added or missing
@@ -53,4 +53,5 @@ Activating a device for the WAN package: the WAN package carries no activation t
 - Refused in this package (exit 2): `--wcache`, `--lora-xkv-*`, `--lora2`, `--i2v-mask-held`,
   `--i2v-svi`, `--i2v-motion`, `--mode low-memory`. A story with `@gen` anchors is refused.
 - `--out` must be outside the package folder.
-- Serve: a resident render server (`bin/wan_res`) renders request after request in one process, bit-identical to `./veizik run`, re-checking the licence for every request; driven by a file protocol, not HTTP.
+- Serve: `veizik serve` exposes a render API on loopback (`POST /v1/videos/generations` with a prompt and seed → a folder of PNG frames; `GET /health`; `GET /v1/models`) on a resident render server (`bin/wan_res`) that renders request after request in one process, bit-identical to a one-shot run, re-checking the licence for every request. It needs `veizik activate` and the weights, like `run`.
+- `veizik update` and `veizik convert` exist in the CLI but are not functional yet.

@@ -15,7 +15,7 @@ Veizik runs the Qwen3.5 (0.8B, 2B, 4B, 9B) and Qwen3.6-35B-A3B language models *
 GPU** through its own native engine: per-architecture native CUDA code, no Python runtime,
 no CUDA toolkit, no cloud at inference time. `veizik serve` provides a local OpenAI-compatible HTTP
 server (chat completions, text completions, streaming). On Qwen3.6-35B-A3B, the package's launcher also
-takes one image or one video (a folder of frames) with the text prompt (§4a). This folder is the authoritative support
+takes one image or one video (a folder of frames) with the text prompt (`veizik run … --image` / `--video`, §4a). This folder is the authoritative support
 documentation for the shipped CUDA Qwen package — install, activation, every CLI command, serving
 over HTTP, and a reproducible benchmark set.
 
@@ -33,7 +33,7 @@ over HTTP, and a reproducible benchmark set.
 | Package | `veizik-qwen-cuda-1.1.0-linux-x86_64.tar` (58,573,312 B) |
 | Package SHA-256 | `d38f30780b873bac616b5b1e7e54a47ee6e8c9dcb5ad18fe47d86a6457852a54` (short form `d38f3078`) |
 | Supersedes | `veizik-cuda 1.0.0`. 1.1.0 adds image and video input on Qwen3.6-35B-A3B; the five text models are unchanged |
-| CLI version (`veizik version`) | `1.2.0` — CLI build `9b000b81` (x86_64); the tarball's aarch64 CLI is build `af92fd50` but the engine is x86-64 only |
+| CLI version (`veizik version`) | `1.4.3` — the same CLI serves the Qwen and the WAN package; the engine is x86-64 only |
 | Backend | `CUDA` (native kernels, one set per GPU architecture) |
 | Signing | engine files integrity-sealed and checked at every start; the release catalogue is signed with Veizik's production code-signing key and can be verified with the bundled public key |
 | GPU architectures | `sm_80` / `sm_86` / `sm_89` / `sm_90a` / `sm_100a` / `sm_120a` — GPU code ships as per-architecture cubin (SASS); the loader does no JIT. The image and video stage ships GPU code for `sm_86`, `sm_89` and `sm_120a` |
@@ -58,8 +58,8 @@ prompt in your terminal: type a message, read the model's text reply, repeat (ea
 on its own). `veizik serve <model>` answers `POST /v1/chat/completions` (with streaming) for programs
 and any OpenAI-compatible client, next to `POST /v1/completions` and `GET /v1/models`.
 
-**Not in this release:** downloading weights with `veizik pull`, a weight converter, LoRA adapters,
-image or video input on the four Qwen3.5 models or through `chat` / `serve`, audio input, tool/function calling over HTTP, and usage-ledger / per-tenant quota
+**Not in this release:** a weight converter (`veizik convert` exists but does nothing useful yet, and neither does
+`veizik update`), LoRA adapters, image or video input on the four Qwen3.5 models or through `chat` / `serve`, audio input, tool/function calling over HTTP, and usage-ledger / per-tenant quota
 enforcement on the CUDA server (an API key is supported: `serve --require-auth`). Each is stated
 where it matters in
 [`CLI_USAGE.md`](CLI_USAGE.md) and [`USAGE_GUIDE.md`](USAGE_GUIDE.md).
@@ -71,26 +71,27 @@ where it matters in
 ```bash
 curl -fsSL https://veizik.com/install.sh | sh   # installs the veizik command only, sha-checked against this repository's SHA256SUMS
 export PATH="$HOME/.local/bin:$PATH"
-veizik list                     # the packages you can install
+veizik list                     # model engines: installed and available
 veizik install qwen36           # this package (release v1.1.0)
-veizik version                  # veizik 1.2.0 · backend CUDA
+veizik version                  # the CLI version and backend
 veizik doctor                   # root, backend, activation service, integrity of the CLI binary
 ```
 
-- The install script installs only the `veizik` command, sha-checked against this repository's
-  `SHA256SUMS`; on macOS it points you to the Apple disk image instead.
+- The install script installs only the `veizik` command (the latest release), sha-checked against this
+  repository's `SHA256SUMS`; on macOS it points you to the Apple disk image instead.
 - Install names are keywords: the Qwen package is `qwen`, `qwen35`, `qwen36` or any of its model keys (`qwen35_0p8b`, `qwen35_2b`, `qwen35_4b`, `qwen35_9b`, `qwen36_35b_a3b`); the WAN package is `wan`, `wan21`, `wan22` or any of its model keys (`wan21_t2v_1_3b`, `wan21_t2v_14b`, `wan22_t2v_a14b`, `wan22_i2v_a14b`). Case does not matter, and `.` or `-` may stand for `_`.
 - `veizik install` downloads the package anonymously from this repository's release, refuses it if
   its sha256 differs from the published release digest
   (`d38f30780b873bac616b5b1e7e54a47ee6e8c9dcb5ad18fe47d86a6457852a54`), and extracts it to
   `${XDG_STATE_HOME:-~/.local/state}/veizik/engines/<model>/`. It refuses to run on macOS. `veizik run`,
   `chat` and `serve` find the installed engine themselves.
-- `veizik uninstall qwen36` (alias `veizik rm`) removes the installed package.
+- `veizik uninstall qwen36` (alias `veizik rm`) removes the installed package. `veizik update` exists
+  but is not functional yet; to get a newer package, run `veizik install` again.
 - The installed engine folder is integrity-checked on every start: do not add, remove or edit files
   inside it, and write outputs elsewhere (`--out`, default `~/veizik-out`). If the CLI reports
   `no Veizik NVIDIA engine here`, set `VEIZIK_ROOT` to the engine folder `veizik install` printed.
 
-Uninstall: `veizik deactivate` (see §3), then `veizik uninstall qwen36`.
+Uninstall: `veizik uninstall qwen36`. To free this device's slot on your licence, use `veizik devices disable <tag>` (§3).
 
 ### Manual install (the package's tarball)
 
@@ -144,14 +145,14 @@ remove it, delete `~/.local/bin/veizik` and the folders under `~/.local/lib/veiz
 
 Download the Hugging Face snapshot of each model you want (`config.json`, `tokenizer.json`,
 `tokenizer_config.json` and every `*.safetensors` file) from its publisher, under the publisher's
-licence. `veizik pull` reports that it cannot fetch weights for this package, so download them yourself.
+licence, or fetch them with `veizik pull <model>[@<revision>]` (run `veizik hf login` first for a gated model).
 
 ```bash
 export VZ_WEIGHTS=/data/models        # a folder holding Qwen3.5-0.8B/, Qwen3.5-9B/, …
-# or pass --weights /data/models/Qwen3.5-9B to run / serve
+# or pass --weights /data/models/Qwen3.5-9B to serve
 ```
 
-`run` searches `--weights`, then `VZ_WEIGHTS`, then `VEIZIK_CACHE`, then the Hugging Face cache;
+`run` searches `VZ_WEIGHTS`, then `VEIZIK_CACHE` (the `veizik pull` cache), then the Hugging Face cache;
 `serve` needs the checkpoint folder itself (see [`CLI_USAGE.md`](CLI_USAGE.md)). A folder counts only if
 it is complete; if nothing matches, the run stops with exit code **3** and lists where it looked.
 
@@ -184,15 +185,16 @@ printf '%s' "$CLI_PASSWORD" | veizik activate --key vzek_… --password-stdin
 - Activation is **per device**. Installing a later release on an approved machine renews silently
   with no browser; `veizik activate --refresh` renews the lease only. `run` and `serve` also renew a
   lease that is within 3 days of expiring.
-- `veizik status` shows this device's lease and expiry. This build has no `device-id` command;
-  `veizik devices` lists the devices on your licence, and `veizik deactivate [--forget]` releases
-  this one.
+- `veizik status` shows this device's lease and expiry. `veizik device-id` prints this machine's
+  device id (it matches the website list), `veizik devices` lists the devices on your licence, and
+  `veizik devices disable <tag>` / `enable <tag>` switches one.
+- One approval covers all installed models; `veizik activate <model>` narrows it to one engine.
 - Always go through `veizik activate`: do not create or edit the device-key and lease files yourself,
   and do **not** copy an activated install or its key files to another machine — the lease is bound
   to this device and will not verify elsewhere. Anyone who copies the device key can use your
   activation; keep it private.
-- Headless enrolment with an organisation token (`activate --token`) is **not available in this
-  release**; the binary recognises the flag only to refuse it.
+- Headless enrolment with an organisation token (`activate --token`) is **not available in the shipped
+  build**; the binary recognises the flag only to refuse it.
 
 | exit code | meaning |
 |---|---|
@@ -208,8 +210,8 @@ printf '%s' "$CLI_PASSWORD" | veizik activate --key vzek_… --password-stdin
 veizik run qwen35_2b "The capital of France is" --tokens 32
 veizik run qwen36_35b_a3b "Explain attention in one paragraph."
 
-# a larger model, a named mode, a prompt from a file, a chosen output folder
-veizik run qwen35_9b --prompt-file question.txt --mode balanced --tokens 256 --out ./out
+# a larger model, a named mode, a prompt from a file, a chosen output folder (an absolute path)
+veizik run qwen35_9b "$(cat question.txt)" --mode balanced --tokens 256 --out $HOME/out
 
 # local OpenAI-compatible HTTP server (loopback only): chat + text completions, streaming supported
 veizik serve qwen35_2b --weights /data/models/Qwen3.5-2B --port 8000
@@ -225,23 +227,28 @@ veizik bench qwen35_9b
 
 # interactive chat in the terminal (type a message, read the reply; /exit leaves)
 veizik chat qwen35_2b
+
+# resident servers
+veizik ps
+veizik stop 8000                  # or: veizik stop all
 ```
+
+`run`, `chat` and `serve` generate only on an activated device and with the model weights present.
 
 ### 4a. Image and video input (Qwen3.6-35B-A3B only)
 
 ```bash
-# the package's launcher (INTERFACE.json entry PIPELINE.sh) in the installed engine folder
-export VEIZIK_ROOT=<engine folder veizik install prints>
-
 # one image (PNG or JPEG) with a text prompt; photo.png stands for your own file
-"$VEIZIK_ROOT"/PIPELINE.sh --model qwen36_35b_a3b --image photo.png --prompt "What is in this picture?" --out ./out
+veizik run qwen36_35b_a3b "What is in this picture?" --image photo.png
 
 # one video: a folder of 2–256 PNG or JPEG frames, all the same size, in file-name order
-"$VEIZIK_ROOT"/PIPELINE.sh --model qwen36_35b_a3b --video ./frames --video-fps 2 --prompt-file question.txt --out ./out
+veizik run qwen36_35b_a3b "$(cat question.txt)" --video ./frames --video-fps 2
 ```
 
-Each run takes exactly one image or one video, never both, and always with `--prompt` or
-`--prompt-file`. The chat template is applied and the answer ends at the end-of-turn token. Details,
+Flags: `--image FILE`, `--video DIR`, `--image-max-pixels N`, `--video-max-pixels N`, `--video-fps X`
+(only on `qwen36_35b_a3b`; the other models refuse them with `<flag> does not apply to this model.`).
+
+Each run takes exactly one image or one video, never both, and always with a text prompt. The chat template is applied and the answer ends at the end-of-turn token. Details,
 limits and exit codes: [`USAGE_GUIDE.md`](USAGE_GUIDE.md) §1a.
 
 `veizik run` writes its output to `gen.txt` in `--out`; for text use `veizik chat` or `veizik serve`. The complete

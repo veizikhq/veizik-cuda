@@ -48,6 +48,28 @@ shift follows the model's per-resolution preset:
 
 ## 2. Install and activate
 
+**With the `veizik` command (CLI 1.4.3).**
+
+```bash
+curl -fsSL https://veizik.com/install.sh | sh   # installs the veizik command only (the latest release)
+export PATH="$HOME/.local/bin:$PATH"
+veizik install wan22                  # the WAN package (release v1.2.0); also: wan, wan21 or a model key
+veizik activate                       # approve this machine once in a browser; covers every installed model
+export VZ_WEIGHTS=/data/models/Wan2.2-T2V-A14B
+veizik run wan22_t2v_a14b "A red car driving along a coastal road at sunset." --out $HOME/clip
+```
+
+Install keywords are `wan`, `wan21`, `wan22` or a model key (`wan21_t2v_1_3b`, `wan21_t2v_14b`,
+`wan22_t2v_a14b`, `wan22_i2v_a14b`); case does not matter and `.` or `-` stand for `_`. `veizik install`
+refuses the download if its sha256 differs from the published digest below. Every `veizik` command
+(`run`, `chat`, `serve`, `ps`, `stop`, `models`, `list`, `install`, `update`, `uninstall`/`rm`, `pull`,
+`hf`, `remove`, `convert`, `inspect`, `bench`, `cache`, `config`, `completion`, `status`, `activate`,
+`devices`, `device-id`, `doctor`, `version`) works for WAN as for Qwen; the full reference is
+[`../CLI_USAGE.md`](../CLI_USAGE.md). `veizik update` and `veizik convert` exist but are not functional
+yet.
+
+**From the tarball by hand.**
+
 ```bash
 curl -LO https://github.com/veizikhq/veizik-cuda/releases/download/v1.2.0/veizik-wan-1.2.0-linux-x86_64.tar
 echo "8a594e6587db6259175936d60e1604a2156d4835e72dcc458dcc685783e8b027  veizik-wan-1.2.0-linux-x86_64.tar" | sha256sum -c -
@@ -57,11 +79,10 @@ cd veizik-wan-1.2.0-linux-x86_64
 bin/vzseal "$PWD"        # integrity check by hand: prints VZSEAL OK <n>, exit 0
 ```
 
-The package runs from the folder you unpacked; it has no installer. Do not add, remove or edit files
+A hand-unpacked package runs from the folder you unpacked; it has no installer. Do not add, remove or edit files
 inside that folder, and write output elsewhere (§4).
 
-**Activation.** The GPU kernels open only on a device activated for this release.
-Activating a device for the WAN package: the WAN package carries no activation tool of its own, so contact support@veizik.com to activate a device for it. Activation does not need the model weights; rendering does.
+**Activation.** The GPU kernels open only on a device activated for this release. With the `veizik` command, `veizik activate` activates this device (one browser approval covers every installed model); a package unpacked by hand carries no activation tool of its own, so install it with `veizik install wan22` or contact support@veizik.com. Activation does not need the model weights; rendering does.
 Without activation every GPU stage stops before any compute with
 `VZ_PTX_BOOT_FAIL render rc <n>`, and the run exits **70** with `VZ_ACTIVATION_REQUIRED`:
 
@@ -81,7 +102,7 @@ weights, the compute path, stream use), not what a caller claims.
 ## 3. Model weights
 
 Download each model's Hugging Face snapshot from its publisher, under the publisher's licence, and
-point the run at it with `--weights DIR` or `VZ_WEIGHTS=DIR`. Without either the run stops with exit 3.
+point the run at it with `VZ_WEIGHTS=DIR` (or `--weights DIR` on the package's own launcher, §4), or fetch it with `veizik pull <model>`. Without weights the run stops with exit 3.
 
 | model | folders the weights directory must hold |
 |---|---|
@@ -103,6 +124,30 @@ export VZ_WEIGHTS=/data/models/Wan2.1-T2V-1.3B
 ---
 
 ## 4. Run
+
+**With the `veizik` command.** `veizik run <model> "<prompt>" [options]` saves the frames under
+`--out` (an absolute folder; default `~/veizik-out`) in `frames/`. The CLI forwards to the WAN engine only these
+flags, and refuses any other with `<flag> does not apply to this model.`:
+
+| flags | notes |
+|---|---|
+| `--out DIR` `--name NAME` | where the render is saved; `--name` saves it as `<out>/<NAME>` |
+| `--steps` `--frames` `--width` `--height` `--seed` | steps, frame count, size, noise seed |
+| `--guidance` `--guidance2` `--shift` | guidance (`--guidance2` is the low-noise expert) and flow shift |
+| `--mode` | `quality` · `balanced` · `fast` · `ultrafast` |
+| `--png-step` `--det-vae yes` | PNG cadence; deterministic VAE |
+| `--image FILE` | first frame for image-to-video |
+| `--neg-file FILE` | negative prompt from a file |
+| `--lora FILE` `--lora-scale X` | accepted by the CLI; LoRA is not supported in this release |
+| `--resume` `--resume-from REF` `--checkpoint-every N` | resume an interrupted run, or resume the run folder `REF` (a `--name`, or an absolute folder; it reloads `work/s4.ckpt` there; this is not `--extend`); checkpoint every N steps |
+| `--vzq FILE` | load sealed `.vzq` weights |
+
+```bash
+veizik run wan21_t2v_1_3b "A paper boat on a pond." --out $HOME/clip --steps 30 --seed 7
+veizik run wan21_t2v_1_3b "A paper boat on a pond." --out $HOME/clip --resume     # continue after an interruption
+```
+
+**With the package's own launcher** (a package unpacked by hand), every option below is available:
 
 ```
 ./veizik run <model> --out DIR [--prompt TEXT | --prompt-file FILE] [--neg TEXT | --neg-file FILE]
@@ -207,9 +252,22 @@ memory stays at one window's. `--story FILE` drives it with lines of the form `<
 
 ---
 
-## 8. Resident mode (`bin/wan_res`)
+## 8. Serve: render API and resident server (`bin/wan_res`)
 
-This is the WAN package's serve: a resident render server that keeps one process and one GPU context and renders request after request. It is driven by the file protocol below rather than HTTP.
+**HTTP render API.** `veizik serve [<wan model>] [--port N]` answers on `127.0.0.1` (loopback only):
+
+| method | path | what it does |
+|---|---|---|
+| `POST` | `/v1/videos/generations` | body `{"prompt": "...", "seed": N}`; renders and answers with a folder of PNG frames |
+| `GET` | `/health` | status |
+| `GET` | `/v1/models` | the models this server answers to |
+
+A resident render server runs underneath, so the model stays loaded between requests. Like `run`, it
+needs `veizik activate` and the model weights (including the prepared `vae/` layout, §3); until the
+device is activated a request is refused. List running servers with `veizik ps` and stop one with
+`veizik stop <port>` (or `veizik stop all`).
+
+**Resident server by hand (`bin/wan_res`).** The server underneath keeps one process and one GPU context and renders request after request. A package unpacked by hand drives it with the file protocol below.
 
 One process and one CUDA context render request after request: the stages run in it in order, each
 stage's GPU memory is released when it ends, and with `WAN_RES_TAPE_MB` set the transformer weights

@@ -1,4 +1,4 @@
-# veizik-cuda 1.1.0 (Qwen3.5 / Qwen3.6) — Detailed Usage Guide
+# veizik-cuda 1.1.0 (Qwen3.5 / Qwen3.6) — Detailed Usage Guide (CLI 1.4.3)
 
 Goes beyond the command reference ([`CLI_USAGE.md`](CLI_USAGE.md)): how the run modes actually
 behave, serving over HTTP, long-context prompts, sampling, performance, and troubleshooting. Every
@@ -14,6 +14,9 @@ release the text says so.
 | one-shot | `veizik run <model> "<prompt>"` | scripts, single generations | no — the output is written to `gen.txt` when the run finishes | one generation per process |
 | interactive | `veizik chat <model>` | talking to a model in the terminal: type a message, read the text reply, repeat (each message is answered on its own; no history is kept between messages) | — | — |
 | HTTP server | `veizik serve <model>` | chat and text completions for applications and OpenAI-compatible clients (`POST /v1/chat/completions`) | **yes** — server-sent events (§2) | batched across a fixed number of slots (§2) |
+
+All three need `veizik activate` and the model weights before they generate. The same commands and the
+same `run` flag vocabulary serve the WAN video models; their guide is [`wan/README.md`](wan/README.md).
 
 Each `run` loads the model, generates and exits, so model load time is paid on every invocation. Use
 `serve` to keep the model resident.
@@ -39,8 +42,9 @@ P=$(printf '<|im_start|>user\nExplain attention in two sentences.<|im_end|>\n<|i
 veizik run qwen35_4b "$P" --tokens 96 --out ./out
 ```
 
-In validation every one-shot text run produced exactly the number of tokens requested; it does not
-stop at the end-of-turn token. Trim the output at `<|im_end|>`. The chat endpoint of `serve` applies
+`--tokens N` (or `--max-tokens N`) sets the generation length; add `--ignore-eos` (no value) to emit
+exactly N tokens instead of stopping at the end-of-turn token. A text prompt is used as written, so with
+a chat-formatted prompt trim the output at `<|im_end|>`. The chat endpoint of `serve` applies
 the chat template for you and stops at end-of-sequence. Image and video runs (§1a) apply the chat
 template themselves and end at the end-of-turn token.
 
@@ -48,23 +52,22 @@ template themselves and end at the end-of-turn token.
 
 ## 1a. Image and video input (Qwen3.6-35B-A3B only)
 
-New in 1.1.0. On Qwen3.6-35B-A3B the package's launcher (the `PIPELINE.sh` entry named in the engine
-folder's `INTERFACE.json`) can look at one image or one short video together with a text prompt. The other four models take text only, and `veizik chat` and `veizik serve` take text only
-(`serve` answers an image or other non-text message part with 400 `unsupported_content_part`).
+New in 1.1.0. On Qwen3.6-35B-A3B, `veizik run` can look at one image or one short video together with a
+text prompt. The other four models take text only, and `veizik chat` and `veizik serve` take text only
+(`serve` answers an image or other non-text message part with 400 `unsupported_content_part`). The
+flags are accepted for `qwen36_35b_a3b` only; any other model refuses them with `<flag> does not apply to this model.`
 
 ```bash
-export VEIZIK_ROOT=<engine folder veizik install prints>   # veizik install qwen36
-
 # one image; photo.png stands for your own PNG or JPEG file
-"$VEIZIK_ROOT"/PIPELINE.sh --model qwen36_35b_a3b --image photo.png --prompt "What is in this picture?" --out ./out
+veizik run qwen36_35b_a3b "What is in this picture?" --image photo.png
 
 # one video: a folder of PNG or JPEG frames, all the same size; file-name order is time order
-"$VEIZIK_ROOT"/PIPELINE.sh --model qwen36_35b_a3b --video ./frames --video-fps 2 --prompt-file question.txt --out ./out
+veizik run qwen36_35b_a3b "$(cat question.txt)" --video ./frames --video-fps 2
 ```
 
 | option | default | meaning |
 |---|---|---|
-| `--image FILE` (`--image-file`) | — | a PNG or JPEG file; exactly one image per run |
+| `--image FILE` | — | a PNG or JPEG file; exactly one image per run |
 | `--image-max-pixels N` | 1,048,576 | upper bound on the image's pixel count after resizing (65,536 – 16,777,216); a larger image is scaled down to fit. More pixels keep more detail and use more memory and time |
 | `--video DIR` | — | a folder of 2 to 256 PNG or JPEG frames, all the same size, in file-name order; exactly one video per run |
 | `--video-fps X` | 2 | the frame rate of the frames in the folder (0.001 – 1000); it sets the time stamps the model sees between frames |
@@ -72,7 +75,7 @@ export VEIZIK_ROOT=<engine folder veizik install prints>   # veizik install qwen
 
 Rules:
 
-- One image **or** one video per run, never both, and always with `--prompt` or `--prompt-file`.
+- One image **or** one video per run, never both, and always with a text prompt.
 - The chat template is applied for you, and the answer ends at the end-of-turn token.
 - To keep frame names in time order, number them with leading zeros (`0001.png`, `0002.png`, …).
 - The image and video stage ships GPU code for `sm_86`, `sm_89` and `sm_120a`. On a GPU the image and video stage does not support, the run is refused cleanly with code 50 (`the image stage refused this request (status 50)`) before any image or video work.
@@ -193,9 +196,7 @@ arrives as an event inside the stream and no `[DONE]` follows.
   `127.0.0.1:<port>`. Keep `--require-auth` on behind the proxy (the proxy either sends the key
   itself or passes the client's `Authorization` header through), and let only the proxy listen on
   an external address. Streaming needs a proxy that does not buffer server-sent events (for nginx,
-  `proxy_buffering off`). `veizik gateway` ([`CLI_USAGE.md`](CLI_USAGE.md)) is a bundled TLS 1.3
-  front that streams SSE; it has not been exercised against the CUDA server in this release's
-  validation, so test it with your own traffic first.
+  `proxy_buffering off`).
 - **Authentication.** Without `--require-auth` the CUDA server has **no authentication**: it is open
   to every local process on the machine. Turn it on with a key:
 
@@ -215,9 +216,8 @@ arrives as an event inside the stream and no `[DONE]` follows.
   **Use `--keyfile`** (first line of the file): `--api-key K` works too but leaves the key on the
   `veizik serve` command line, visible to every local user in `ps`. The CLI passes the key to the
   engine through its environment (`SV_API_KEY`), not on the engine's command line, and never prints
-  it. In an OpenAI client, set `api_key` to the key. The usage ledger (`--usage-log`), tenant
-  quotas (`--quota-*`) and the `keys` store are **not** part of the CUDA server; `keys`, `usage`,
-  `audit` and `quota` are local CLI tools only.
+  it. In an OpenAI client, set `api_key` to the key. A usage ledger, tenant quotas and a per-user key
+  store are **not** part of the CUDA server.
 - **Speed over HTTP.** The server batches requests and does not use the speculative decoding that the
   one-shot `balanced` figures include, so per-request speed over HTTP is not the number in the
   benchmark board. Server throughput is not published for this release.
@@ -252,13 +252,9 @@ arrives as an event inside the stream and no `[DONE]` follows.
 
 ### Managing the server
 
-`veizik ps` and `veizik stop` do not see the CUDA server — in particular **`veizik stop` does not
-close a server you started detached** (background, `nohup`, `tmux`, a supervisor). Run it in a
-terminal and press Ctrl-C: the signal reaches the engine, which drains in-flight requests and exits.
-For a detached server, find the engine process listening on the port (`ss -ltnp | grep :8000`) and
-`kill` it, or signal the whole process group of the `veizik serve` process so that the engine
-receives the signal. `veizik service` is not usable with this package (its unit cannot carry the
-weights location).
+`veizik ps` lists the resident servers running on this machine, and `veizik stop <port>` or
+`veizik stop all` stops them. A server run in a terminal can also be stopped with Ctrl-C: the signal
+reaches the engine, which drains in-flight requests and exits.
 
 Exit codes of `veizik serve`: `2` usage, invalid model name or a bad/misplaced API-key option, `3` weights not found, `6` no
 launcher or not a text package, `4` integrity or GPU modules, `70`/`74` activation; otherwise the
@@ -285,7 +281,7 @@ about 3.4 GB in use at ready; Qwen3.6-35B-A3B 27.1 GB in use of 32.6 GB at ready
   this release (the measured prompt pass is only 21 tokens and is latency-bound).
 - **Memory grows with context** (the KV cache scales with positions) on top of the resident weights.
   If a long-prompt run is tight, use a smaller model, `--mode low-memory`, or a shorter prompt.
-- Put long prompts in a file: `--prompt-file question.txt`. For the server, keep prompt plus
+- Put long prompts in a file and pass them as `"$(cat question.txt)"`. For the server, keep prompt plus
   `max_tokens` inside the window or split the document.
 
 ---
@@ -345,22 +341,23 @@ What you can do:
 | `activation … NOT confirmed` / "model weights are not on this machine yet" (exit 6) | the lease installed but the check generation could not run | get the `Qwen3.5-0.8B` checkpoint, set `VZ_WEIGHTS`, run `veizik activate` again |
 | exit `70` `VZ_ACTIVATION_REQUIRED` | no key, no lease, or the lease expired | `veizik activate` (or `veizik activate --refresh`) |
 | exit `74` `VZ_ENTITLEMENT_REFUSED` | a lease is present but was not issued for this package on this device | `veizik activate --reapprove`; make sure the installed engine folder was not renamed |
-| exit `3`, "weights for `<model>` … not found. Looked in:" | no complete checkpoint of that model | download the full snapshot (config, tokenizer, every weight file) and use `--weights`, `VZ_WEIGHTS` or the Hugging Face cache |
+| exit `3`, "weights for `<model>` … not found. Looked in:" | no complete checkpoint of that model | download the full snapshot (config, tokenizer, every weight file) and use `VZ_WEIGHTS` or the Hugging Face cache (`--weights` on `serve`), or `veizik pull <model>` |
 | exit `3` from `serve`: "could not find the weights … tokenizer.json and tokenizer_config.json" | `serve` needs the checkpoint folder itself, with both tokenizer files | pass `--weights <checkpoint folder>` or set `VZ_WEIGHTS` to that folder (not its parent) |
 | `the checkpoint has no tokenizer.json` (exit 3) | a text prompt needs the tokenizer file | download the complete snapshot |
 | exit `4` `VZ_PTX_BOOT_FAIL` | the engine failed its integrity check, or its GPU modules did not open | reinstall from the tarball after verifying its SHA-256; never edit the installed folder |
 | exit `2` "cannot read the GPU compute capability" / "GPUs with different compute capabilities" / "unusable compute capability" | `nvidia-smi` is missing, or the GPUs differ | `export Q35_SEAL_ARCH=sm86` (or `sm80`, `sm89`, `sm90a`, `sm100a`, `sm120a`) to match your GPU |
 | "compute capability N.M has no kernel set in this bundle" | your GPU architecture is not in this package | supported: 8.0, 8.6, 8.9, 9.0, 10.0, 12.0 |
-| exit `2` "unknown option … Nothing was run." / "run does not know the option …" | a misspelt or unsupported option | check [`CLI_USAGE.md`](CLI_USAGE.md); options are exact |
-| exit `2` "`--out` must be outside the bundle" | the output folder is inside the engine folder | choose another `--out` (the default `~/veizik-out` is fine) |
+| exit `2` "unknown option … for run." | a misspelt or unsupported option | check [`CLI_USAGE.md`](CLI_USAGE.md); options are exact |
+| exit `2` "`<flag>` does not apply to this model." | the flag is not in this engine's accepted set | use only the flags listed for the model in [`CLI_USAGE.md`](CLI_USAGE.md) (`run`) |
+| exit `2` "`--out` takes an absolute directory" / "`--out` must be outside the bundle" | `--out` is relative, or inside the engine folder | give an absolute folder outside the engine folder (the default `~/veizik-out` is fine) |
 | `quality … does not fit this N MiB GPU; using balanced` | 35B-A3B `quality` needs about 26 GB or more | accept `balanced`, or use a larger card |
 | CUDA out-of-memory | the model, mode and context do not fit | use a smaller model or `--mode low-memory`; close other GPU programs |
 | `run` / `serve` exits `1` after the engine finished | the engine could not confirm the configuration it ran in; the result is not what you asked for | re-run; report it if it repeats |
 | exit `2` on an `--image` / `--video` run | wrong model, more than one input, no text prompt, or an unusable file or frame set | see §1a |
 | "the image stage refused this request (status 50)" | the GPU has no image / video stage code (supported: `sm_86`, `sm_89`, `sm_120a`) | use a supported GPU, or text input |
-| `veizik pull` says it "cannot fetch weights for this package" | `pull` has no source for this package's checkpoints | download the Hugging Face snapshot yourself and use `--weights DIR` or `VZ_WEIGHTS` |
-| `veizik inspect` reports the model's weights as missing | expected: the weights are external to the install | nothing to fix; check with `veizik run … --weights DIR` |
-| `veizik models` shows `incomplete (no weights)` | a per-model status label: the weights are external to the install | ignore it; check with `veizik run … --weights DIR` |
+| `veizik pull` stops on a gated model | the model needs a Hugging Face token | `printf %s "$HF_TOKEN" \| veizik hf login`, then pull again; or download the snapshot yourself and use `VZ_WEIGHTS` |
+| `veizik inspect` reports the model's weights as missing | the weights are not where the CLI looks | set `VZ_WEIGHTS`, or `veizik pull <model>` |
+| `veizik models` shows `incomplete (no weights)` | a per-model status label: the weights are external to the install | ignore it; check with `veizik run …` |
 | you want a conversation, not a one-shot answer | `run` is one-shot | use `veizik chat <model>` in the terminal, or `veizik serve` and `POST /v1/chat/completions` (§2) from a program |
 | `serve` printed "is loading …", or requests fail right after start | the model is still loading | wait for `GET /readyz` to return 200 |
 | HTTP 404 `model_not_found` | `model` is not the server's id | use the id from `GET /v1/models` |
@@ -370,9 +367,9 @@ What you can do:
 | `serve` exits 2: "`--require-auth` needs `--api-key <key>` or `--keyfile <path>`" / "`--api-key`/`--keyfile` requires `--require-auth`" | the key option and `--require-auth` must be given together | pass both, with exactly one key source |
 | `serve` exits 2: "`--api-key`/`--keyfile` must be 8..256 printable ASCII bytes, no spaces" / "`--keyfile` could not be read, or is empty" | the key is too short, too long, has a space or non-ASCII byte, or the file is unreadable | use 8–256 printable characters without spaces; the key is the first line of the file |
 | `serve --host 0.0.0.0` exits 2 | the CUDA server is loopback-only | keep `--host 127.0.0.1` and put a TLS reverse proxy in front |
-| `veizik stop` does nothing to a server you backgrounded | `stop` does not manage the CUDA server | kill the engine process listening on the port (`ss -ltnp`), or press Ctrl-C in its terminal |
+| `veizik ps` does not list your server | no resident server is running on this machine, or it already exited | start it again with `veizik serve`; `veizik stop <port>` stops one |
 | HTTP 503 `server_overloaded` / 429 `rate_limit_exceeded` | no free slot or a concurrency limit | retry with backoff |
-| `--usage-log` / `--quota-*` / the `keys` store seem to do nothing on `serve` | the CUDA server has no usage ledger, quotas or key store; only `--require-auth` with one shared key is supported | see §2 "Authentication" |
+| `veizik update` or `veizik convert` does nothing useful | both exist as commands but are not functional yet | reinstall with `veizik install <model>`; no conversion is needed, `run` reads a Hugging Face checkpoint as it is |
 | anything under WSL | the sealed engine does not run on WSL | use a native Linux host |
 | `install: install path has an unsafe character` | the destination path has characters outside letters, digits and `/ . _ - ~ + @ :` and space | use a plain path |
 
@@ -384,14 +381,14 @@ Never include your device key files, activation key or CLI password. Support: su
 
 ## 7. What Veizik does not do
 
-- It does not download model weights for you, and does not change the licence of the checkpoint you
-  supply.
+- It does not change the licence of the checkpoint you supply (`veizik pull` fetches a publisher's
+  weights under that publisher's licence).
 - Generation makes no network calls. Only activation, lease renewal (`run` and `serve` renew a lease
   that is within 3 days of expiring), and `pull`/`hf` use the network.
 - It does not upload prompts, outputs or telemetry.
 
 Not in this release: LoRA adapters; image or video input on the Qwen3.5 models or through `chat` /
-`serve`; audio input; a weight converter;
-pulling weights; tool or function calling, `logprobs`, structured output and embeddings over HTTP;
+`serve`; audio input; a weight converter (`veizik convert` and `veizik update` exist but are not
+functional yet); tool or function calling, `logprobs`, structured output and embeddings over HTTP;
 per-user API keys, an in-server usage ledger and tenant quotas on the CUDA server; a non-loopback
 bind through the CLI; published server throughput.
