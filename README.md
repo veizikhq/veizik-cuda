@@ -80,23 +80,10 @@ veizik uninstall qwen36               # removes an installed package (alias: vei
 - WAN: frames land in `<run folder>/frames/`. `veizik serve` answers with the same frames through the HTTP render API; see [`cuda_deploy/wan/README.md`](cuda_deploy/wan/README.md).
 - WAN activation: one `veizik activate` approval covers every installed model, WAN included. Without activation every WAN GPU stage stops before any compute and the run exits 70 (`VZ_ACTIVATION_REQUIRED`). The weights folder needs a prepared `vae/` decoder layout (`vae/manifest.txt`) that the package cannot make from the published checkpoint; contact support@veizik.com for it.
 
-### Manual install (each package's tarball)
-**Qwen (v1.1.0)**
-```bash
-curl -LO https://github.com/veizikhq/veizik-cuda/releases/download/v1.1.0/veizik-qwen-cuda-1.1.0-linux-x86_64.tar
-echo "d38f30780b873bac616b5b1e7e54a47ee6e8c9dcb5ad18fe47d86a6457852a54  veizik-qwen-cuda-1.1.0-linux-x86_64.tar" | sha256sum -c -
-tar xf veizik-qwen-cuda-1.1.0-linux-x86_64.tar
-cd veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86   # the folder name is fixed by the release identity; do not rename it
-./install.sh                          # checks SHA256SUMS and the engine's own seal, then installs under ~/.local/lib/veizik
-```
-**WAN (v1.2.0)**
-```bash
-curl -LO https://github.com/veizikhq/veizik-cuda/releases/download/v1.2.0/veizik-wan-1.2.0-linux-x86_64.tar
-echo "8a594e6587db6259175936d60e1604a2156d4835e72dcc458dcc685783e8b027  veizik-wan-1.2.0-linux-x86_64.tar" | sha256sum -c -
-tar xf veizik-wan-1.2.0-linux-x86_64.tar
-cd veizik-wan-1.2.0-linux-x86_64
-bin/vzseal "$PWD"                     # integrity check by hand; prints VZSEAL OK <n>
-```
+### Checksums (published release digests)
+`veizik install` downloads each package and verifies it against its published release digest automatically — there is no separate manual install step. For reference (e.g. to verify a direct download), the published digests are:
+- `veizik-qwen-cuda-1.1.0-linux-x86_64.tar` — sha256 `d38f30780b873bac616b5b1e7e54a47ee6e8c9dcb5ad18fe47d86a6457852a54`
+- `veizik-wan-1.2.0-linux-x86_64.tar` — sha256 `8a594e6587db6259175936d60e1604a2156d4835e72dcc458dcc685783e8b027`
 
 What needs the network: installing a package, creating the account, activating the device and renewing its lease. Generation itself does not.
 
