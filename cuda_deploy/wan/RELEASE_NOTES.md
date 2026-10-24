@@ -53,4 +53,4 @@ Activating a device for the WAN package: the WAN package carries no activation t
 - Refused in this package (exit 2): `--wcache`, `--lora-xkv-*`, `--lora2`, `--i2v-mask-held`,
   `--i2v-svi`, `--i2v-motion`, `--mode low-memory`. A story with `@gen` anchors is refused.
 - `--out` must be outside the package folder.
-- The WAN package renders to PNG frames; it has no HTTP server.
+- Serve: a resident render server (`bin/wan_res`) renders request after request in one process, bit-identical to `./veizik run`, re-checking the licence for every request; driven by a file protocol, not HTTP.

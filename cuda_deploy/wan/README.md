@@ -209,7 +209,7 @@ memory stays at one window's. `--story FILE` drives it with lines of the form `<
 
 ## 8. Resident mode (`bin/wan_res`)
 
-The WAN package renders to PNG frames; it has no HTTP server. Resident mode is a file-driven daemon for running many renders in one process, as the package's own README.txt documents it.
+This is the WAN package's serve: a resident render server that keeps one process and one GPU context and renders request after request. It is driven by the file protocol below rather than HTTP.
 
 One process and one CUDA context render request after request: the stages run in it in order, each
 stage's GPU memory is released when it ends, and with `WAN_RES_TAPE_MB` set the transformer weights

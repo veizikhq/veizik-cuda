@@ -37,7 +37,7 @@ $ ls ./clip/frames      # frame_00000.png ...
 
 All five models are marked EXPERIMENTAL in the signed model catalogue. Memory is measured after load with text input on an RTX 5090, on the 1.0.0 build; long prompts, images, video and serving need more. Image and video input is an option of the package's launcher for Qwen3.6-35B-A3B only: one PNG or JPEG image, or one folder of 2–256 PNG or JPEG frames, per run, together with a text prompt. The image and video stage ships GPU code for `sm_86`, `sm_89` and `sm_120a`. On a GPU the image and video stage does not support, the run is refused cleanly with code 50 (`the image stage refused this request (status 50)`) before any image or video work. Validation ran on RTX 3090, RTX A5000, RTX 4090 and RTX 5090; the `sm_80`, `sm_90a` and `sm_100a` GPU code is included but was not run in validation.
 
-**Video — veizik-wan 1.2.0** (4 models in one package)
+**Video — veizik-wan 1.2.0** (4 models in one package, with a resident render server)
 
 | Model key | Model | Hugging Face checkpoint | Task | Defaults (size · frames · steps) |
 |---|---|---|---|---|
@@ -99,7 +99,7 @@ https://veizik.com/benchmarks — every published row names the GPU, model, mode
 - Qwen server window: each request may use up to 4,096 tokens (prompt plus `max_tokens`); a request that does not fit gets HTTP 400 `context_length_exceeded`. Unsupported request fields are refused with 400, never ignored.
 - Qwen: Qwen3.6-35B-A3B in `quality` mode needs about 26 GB or more and did not complete on a 32 GB card in validation; use `balanced` or `fast`. Image and video input is available through the package's launcher for Qwen3.6-35B-A3B only, one image or one video per run; `veizik chat` and `veizik serve` take text only. Not in this release: LoRA adapters, audio input, tool calling, embeddings and `logprobs` over HTTP, a weight converter, and weight downloads with `veizik pull`.
 - WAN: a run that is interrupted continues with `--resume yes` and the same `--out`, bit-identical to an uninterrupted render. Long videos render window by window (`--stream yes --window-frames 81`, optionally driven by a `--story` file). A story with `@gen` anchors is refused. `--wcache` is disabled in this bundle.
-- WAN: The WAN package renders to PNG frames; it has no HTTP server. `veizik serve` is for the Qwen package only.
+- WAN serve: the package includes a resident render server (`bin/wan_res`). One process and one GPU context render request after request; results are bit-identical to `./veizik run`; every request re-checks the licence, and a request can be preempted at a step boundary and resumed. It is driven by a file protocol (`WAN_RES_GO=<file>`, see [`cuda_deploy/wan/README.md`](cuda_deploy/wan/README.md) §8), not HTTP; `veizik serve` with its OpenAI-compatible HTTP API is the Qwen package's server.
 - WAN provenance: every generated frame carries a v1 provenance mark — an in-pixel watermark plus XMP `DigitalSourceType=trainedAlgorithmicMedia`. The mark holds no prompt, device, path or account data.
 - Integrity: both engines check their own files at every start. A changed, added or missing file stops the run with exit code 4; reinstall from a verified tarball. Do not add files inside the installed or unpacked engine folder; write output elsewhere.
 - Licensing: a device runs only with a valid lease. Exit 70 means activation is required (`veizik activate`); exit 74 means the lease present was not issued for this package on this device, or does not enable what was asked.
