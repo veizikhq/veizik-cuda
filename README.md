@@ -90,7 +90,7 @@ veizik uninstall qwen36               # removes an installed package (alias: vei
 
 ### Checksums (published release digests)
 `veizik install` downloads each package and verifies it against its published release digest automatically — there is no separate manual install step. For reference (e.g. to verify a direct download), the published downloads and digests are:
-- `veizik-qwen-cuda-1.1.0-linux-x86_64.tar` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.1.0/veizik-qwen-cuda-1.1.0-linux-x86_64.tar — sha256 `6217d3c1befd2f9fca3960b9d434efc2ae1b3677db4c57e3e451a91b154e6102`
+- `veizik-qwen-cuda-1.1.1-linux-x86_64.tar` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.1.0/veizik-qwen-cuda-1.1.1-linux-x86_64.tar — sha256 `8badb4e27ee268b65bf7d3d230c83d3437f7fbc66a04936e87f9b959e6fe8c53`
 - `veizik-wan-1.2.4-linux-x86_64.tar` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.2.4/veizik-wan-1.2.4-linux-x86_64.tar — sha256 `16200f566232b13927e93254d82427ec9b63458e243250969baecc6fe269ec26`
 - `veizik-flux-1.0.4-linux-x86_64.tar` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.0.4/veizik-flux-1.0.4-linux-x86_64.tar — sha256 `bb24bf48d37d95b20a22dc008abca565b2bf40393e091635fa64535715d9377f`
 
@@ -117,7 +117,7 @@ https://veizik.com/benchmarks — every published row names the GPU, model, mode
 
 ## Package contents
 
-**veizik-qwen-cuda-1.1.0-linux-x86_64.tar** (v1.1.0, sha256 `6217d3c1…`, 57,012,224 B)
+**veizik-qwen-cuda-1.1.1-linux-x86_64.tar** (v1.1.0, sha256 `6217d3c1…`, 57,012,224 B)
 Top folder `veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86/`: README.txt 1,927 B · install.sh 3,882 B · SHA256SUMS 207,093 B · veizik-x86_64 1,534,320 B · veizik-aarch64 994,728 B · PTXSEAL.prov 124 B · PTXSEAL.prov.sig 64 B · the sealed engine folder of the same name: INTERFACE.json 10,540 B · PIPELINE.sh 108 B · SHA256SUMS.vz 132,541 B · models.json 644 B · models.json.sig 64 B · bin/ (8 files, including the image and video runners) · models/ (5 model folders, per-model metadata) · GPU code, 251 files per architecture: `ptx/` (sm_80) · `ptx_sm86/` · `ptx_sm89/` · `ptx_sm90a/` · `ptx_sm100a/` · `ptx_sm120a/` · image and video stage GPU code, 16 files per architecture: `ptx_vis_sm86/` · `ptx_vis_sm89/` · `ptx_vis_sm120a/`. 1,583 files in all. Verify with `sha256sum -c SHA256SUMS` inside the top folder.
 
 **veizik-wan-1.2.4-linux-x86_64.tar** (v1.2.4, sha256 `16200f56…`, 6,983,680 B)
