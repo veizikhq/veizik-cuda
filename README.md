@@ -24,7 +24,7 @@ $ veizik serve wan21_t2v_1_3b --port 8000      # render API: POST /v1/videos/gen
 - Every device is activated once (https://veizik.com/activate). The engines open their GPU code only on an activated device.
 - Model weights are not included. You download each checkpoint from its publisher, under the publisher's licence.
 
-**Language — veizik-qwen-cuda 1.1.0** (5 models in one package)
+**Language — veizik-qwen-cuda 1.1.1** (5 models in one package)
 
 | Model key | Model | Hugging Face checkpoint | Chat | Image and video input | Resident GPU memory, `balanced` |
 |---|---|---|---|---|---|
@@ -62,7 +62,7 @@ Step 1 installs the `veizik` command (the latest release); it then installs the 
 curl -fsSL https://veizik.com/install.sh | sh   # installs the veizik command only, sha-checked against this repository's SHA256SUMS
 export PATH="$HOME/.local/bin:$PATH"
 veizik list                           # model engines: installed and available
-veizik install qwen36                 # Qwen package (release v1.1.0)
+veizik install qwen36                 # Qwen package (release v1.1.1)
 veizik install wan22                  # WAN package (release v1.2.4)
 veizik install sd35                   # SD3.5 package (release v1.0.0)
 veizik activate                       # opens veizik.com/activate — approve this machine once
@@ -91,7 +91,7 @@ veizik uninstall qwen36               # removes an installed package (alias: vei
 
 ### Checksums (published release digests)
 `veizik install` downloads each package and verifies it against its published release digest automatically — there is no separate manual install step. For reference (e.g. to verify a direct download), the published downloads and digests are:
-- `veizik-qwen-cuda-1.1.1-linux-x86_64.tar` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.1.0/veizik-qwen-cuda-1.1.1-linux-x86_64.tar — sha256 `8badb4e27ee268b65bf7d3d230c83d3437f7fbc66a04936e87f9b959e6fe8c53`
+- `veizik-qwen-cuda-1.1.1-linux-x86_64.tar` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.1.1/veizik-qwen-cuda-1.1.1-linux-x86_64.tar — sha256 `8badb4e27ee268b65bf7d3d230c83d3437f7fbc66a04936e87f9b959e6fe8c53`
 - `veizik-wan-1.2.5-linux-x86_64.tar` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.2.5/veizik-wan-1.2.5-linux-x86_64.tar — sha256 `7058dbc4a09622bdbfd31a0d945b111495cef943b4e99210987b4f8b0c59f14e`
 - `veizik-sd35-1.0.0-linux-x86_64.tar` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.0.0/veizik-sd35-1.0.0-linux-x86_64.tar — sha256 `27dd712364972c286c8bf99e3a003d420061f979b13080ee31e689ccb26a7f99`
 - `veizik-flux-1.0.4-linux-x86_64.tar` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.0.4/veizik-flux-1.0.4-linux-x86_64.tar — sha256 `bb24bf48d37d95b20a22dc008abca565b2bf40393e091635fa64535715d9377f`
@@ -119,7 +119,7 @@ https://veizik.com/benchmarks — every published row names the GPU, model, mode
 
 ## Package contents
 
-**veizik-qwen-cuda-1.1.1-linux-x86_64.tar** (v1.1.0, sha256 `6217d3c1…`, 57,012,224 B)
+**veizik-qwen-cuda-1.1.1-linux-x86_64.tar** (v1.1.1, sha256 `8badb4e2…`, 59,001,344 B)
 Top folder `veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86/`: README.txt 1,927 B · install.sh 3,882 B · SHA256SUMS 207,093 B · veizik-x86_64 1,534,320 B · veizik-aarch64 994,728 B · PTXSEAL.prov 124 B · PTXSEAL.prov.sig 64 B · the sealed engine folder of the same name: INTERFACE.json 10,540 B · PIPELINE.sh 108 B · SHA256SUMS.vz 132,541 B · models.json 644 B · models.json.sig 64 B · bin/ (8 files, including the image and video runners) · models/ (5 model folders, per-model metadata) · GPU code, 251 files per architecture: `ptx/` (sm_80) · `ptx_sm86/` · `ptx_sm89/` · `ptx_sm90a/` · `ptx_sm100a/` · `ptx_sm120a/` · image and video stage GPU code, 16 files per architecture: `ptx_vis_sm86/` · `ptx_vis_sm89/` · `ptx_vis_sm120a/`. 1,583 files in all. Verify with `sha256sum -c SHA256SUMS` inside the top folder.
 
 **veizik-wan-1.2.5-linux-x86_64.tar** (v1.2.4, sha256 `16200f56…`, 6,983,680 B)
