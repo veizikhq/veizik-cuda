@@ -107,7 +107,7 @@ Flags valid for every model:
 | `--out DIR` | where the render is saved: an absolute folder, created if missing (default `$VEIZIK_OUT`, else `~/veizik-out`). It must be outside the installed engine folder |
 | `--name NAME` | name this run; it is saved as `<out>/<NAME>` (letters, digits, `.` `_` `-`) |
 | `--resume` | resume this run from its own checkpoint |
-| `--resume-from REF` | resume **that run's** folder (`REF` is a `--name`, or an absolute folder); it reloads `work/s4.ckpt` there. It is not `--extend` |
+| `--resume-from REF` | resume **that run's** folder (`REF` is a `--name`, or an absolute folder); it reloads `work/render.vzckpt` there. It is not `--extend` |
 | `--checkpoint-every N` | write a resume checkpoint every N steps |
 | `--vzq FILE` | load weights from a sealed `.vzq` file instead of a checkpoint |
 

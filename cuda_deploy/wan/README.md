@@ -139,7 +139,7 @@ flags, and refuses any other with `<flag> does not apply to this model.`:
 | `--image FILE` | first frame for image-to-video |
 | `--neg-file FILE` | negative prompt from a file |
 | `--lora FILE` `--lora-scale X` | accepted by the CLI; LoRA is not supported in this release |
-| `--resume` `--resume-from REF` `--checkpoint-every N` | resume an interrupted run, or resume the run folder `REF` (a `--name`, or an absolute folder; it reloads `work/s4.ckpt` there; this is not `--extend`); checkpoint every N steps |
+| `--resume` `--resume-from REF` `--checkpoint-every N` | resume an interrupted run, or resume the run folder `REF` (a `--name`, or an absolute folder; it reloads `work/render.vzckpt` there; this is not `--extend`); checkpoint every N steps |
 | `--vzq FILE` | load sealed `.vzq` weights |
 
 ```bash
@@ -237,7 +237,7 @@ memory stays at one window's. `--story FILE` drives it with lines of the form `<
 
 ## 7. Interruption, preemption, resume, progress
 
-- A one-shot render writes its sampler state to `DIR/work/s4.ckpt` after every step
+- A one-shot render writes its sampler state to `DIR/work/render.vzckpt` after every step
   (`--checkpoint-every N`; `0` = off, which also disables preemption). If it is interrupted (crash,
   kill, reboot), run the same command again with `--resume yes` and the same `--out`: the run checks
   the render condition against the checkpoint and continues. The result is bit-identical to an
@@ -281,7 +281,9 @@ stay in host RAM after the first load. Results are bit-identical to `./veizik ru
   A refused request prints `VZ_RESIDENT_REFUSED` and is skipped; an expired or replaced licence ends
   the daemon (exit 70).
 - A request with `WAN_PREEMPT=<file>` is preempted at a step boundary when that file appears
-  (`VZ_RESIDENT_PREEMPTED`); post it again with the same `WAN_CKPT` to resume.
+  (`VZ_RESIDENT_PREEMPTED`); post it again with the same `WAN_CKPT` and the request re-renders
+  deterministically to a bit-identical result (as shipped it restarts the render rather than continuing
+  from the checkpoint).
 - A request cannot change `WAN_PTX`, `VZ_*` or `LD_*` (ignored and logged).
 
 ---
