@@ -1,7 +1,7 @@
 # veizik-cuda
 
 **Run language, video and image models on your own NVIDIA GPU with one native engine.**
-Veizik runs Qwen3.5 / Qwen3.6 language models, Wan2.1 / Wan2.2 video models and the FLUX.1-dev image model on Linux with an NVIDIA GPU. It reads the Hugging Face checkpoint you downloaded yourself. No Python, no framework, no CUDA toolkit, no cloud at inference time: only the NVIDIA driver. Prompts, generated text and generated frames stay on the machine.
+Veizik runs Qwen3.5 / Qwen3.6 language models and Wan2.1 / Wan2.2 video models on Linux with an NVIDIA GPU. It reads the Hugging Face checkpoint you downloaded yourself. No Python, no framework, no CUDA toolkit, no cloud at inference time: only the NVIDIA driver. Prompts, generated text and generated frames stay on the machine.
 
 ## Who this is for
 Developers and teams who run open models on their own NVIDIA hardware and want a sealed native engine instead of a framework stack: a one-shot `run`, an interactive `chat`, or a local HTTP server (`serve`) — an OpenAI-compatible API for language models and a render API for video — with the same commands for every model.
@@ -36,7 +36,7 @@ $ veizik serve wan21_t2v_1_3b --port 8000      # render API: POST /v1/videos/gen
 
 All five models are marked EXPERIMENTAL in the signed model catalogue. Memory is measured after load with text input on an RTX 5090, on the 1.0.0 build; long prompts, images, video and serving need more. Image and video input is an option of the package's launcher for Qwen3.6-35B-A3B only: one PNG or JPEG image, or one folder of 2–256 PNG or JPEG frames, per run, together with a text prompt. The image and video stage ships GPU code for `sm_86`, `sm_89` and `sm_120a`. On a GPU the image and video stage does not support, the run is refused cleanly with code 50 (`the image stage refused this request (status 50)`) before any image or video work. Validation ran on RTX 3090, RTX A5000, RTX 4090 and RTX 5090; the `sm_80`, `sm_90a` and `sm_100a` GPU code is included but was not run in validation.
 
-**Video — veizik-wan 1.2.4** (4 models in one package, with a resident render server and mid-render preempt)
+**Video — veizik-wan 1.2.6** (4 models in one package, with a resident render server and mid-render preempt)
 
 | Model key | Model | Hugging Face checkpoint | Task | Defaults (size · frames · steps) |
 |---|---|---|---|---|
@@ -47,13 +47,6 @@ All five models are marked EXPERIMENTAL in the signed model catalogue. Memory is
 
 The WAN package carries six kernel sets, one per architecture: `sm_80`, `sm_86`, `sm_89`, `sm_90a`, `sm_100a` and `sm_120a`. Every speed figure Veizik states for this bundle was measured on an RTX 3090 (`sm_86`) only; other GPUs run their own kernel sets at speeds not measured.
 
-**Image — veizik-flux 1.0.4** (text to image)
-
-| Model key | Model | Hugging Face checkpoint | Task | Default |
-|---|---|---|---|---|
-| `flux1dev` | FLUX.1-dev | `black-forest-labs/FLUX.1-dev` | text to image | 1024×1024 |
-
-The FLUX package carries six per-architecture GPU kernel sets — `sm_80`, `sm_86`, `sm_89`, `sm_90a`, `sm_100a`, `sm_120a` (render-verified on sm_86/89/90/100/120; sm_80 uses the sm_86 path). `--mode` selects the transformer weight format: `balanced` (xint8, default) · `quality` (int9) · `low-memory` (xint5); device peak ≈ 13.1 / 14.5 / 10.3 GB at 1024×1024. Geometry is fixed at 1024×1024 and guidance is fixed by the model metadata. For now FLUX installs by direct download (see the Checksums section below); the one-word `veizik install flux` arrives in a coming CLI update (it is not in the current Latest CLI). After `veizik activate`, render with `veizik run flux1dev --out DIR --prompt "…"` (weights via `VZ_WEIGHTS` or `--weights DIR`).
 
 ## Install and first run
 Step 1 installs the `veizik` command (the latest release); it then installs the packages. On macOS the script points you to the Apple disk image instead.
@@ -63,7 +56,7 @@ curl -fsSL https://veizik.com/install.sh | sh   # installs the veizik command on
 export PATH="$HOME/.local/bin:$PATH"
 veizik list                           # model engines: installed and available
 veizik install qwen36                 # Qwen package (release v1.1.2)
-veizik install wan22                  # WAN package (release v1.2.4)
+veizik install wan22                  # WAN package (release v1.2.6)
 veizik activate                       # opens veizik.com/activate — approve this machine once
 #   no browser (SSH, servers)? create a key under "Browser-free activation" and a password under "CLI password"
 #   on your account page, then:  veizik activate --key vzek_… --password-stdin < pwfile
@@ -92,7 +85,6 @@ veizik uninstall qwen36               # removes an installed package (alias: vei
 `veizik install` downloads each package and verifies it against its published release digest automatically — there is no separate manual install step. For reference (e.g. to verify a direct download), the published downloads and digests are:
 - `veizik-qwen-cuda-1.1.2-linux-x86_64.tar` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.1.2/veizik-qwen-cuda-1.1.2-linux-x86_64.tar — sha256 `d1f5fd35c950652a31dd70b6dc9baaef67e700f299033e8a83d7f0ab0e6184e6`
 - `veizik-wan-1.2.6-linux-x86_64.tar` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.2.6/veizik-wan-1.2.6-linux-x86_64.tar — sha256 `1e4e0350026c4ed3d6fe2d2980be433bc5d8ef8c2c78fcb7e682842e0a784cd2`
-- `veizik-flux-1.0.4-linux-x86_64.tar` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.0.4/veizik-flux-1.0.4-linux-x86_64.tar — sha256 `eb53a4590f3751678e590f9ec93ce0693ef583ebd6e74ecab05ca600cccb5292`
 
 What needs the network: installing a package, creating the account, activating the device and renewing its lease. Generation itself does not.
 
@@ -122,6 +114,3 @@ Top folder `veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86/`: README.txt 1,927 B �
 
 **veizik-wan-1.2.6-linux-x86_64.tar** (v1.2.6, sha256 `1e4e0350…`, 6,973,440 B)
 PTXSEAL.prov 124 B · PTXSEAL.prov.sig 64 B · folder `veizik-wan-1.2.0-linux-x86_64/`: veizik 4,329 B · PIPELINE.sh 48,411 B · README.txt 8,307 B · MODEL.txt 418 B · STAGES.txt 1,239 B · INTERFACE.json 22,444 B · manifest.json 416 B · CONFORMANCE.json 4,099 B · REPRO.md 670 B · PROVENANCE.txt 483 B · THIRD_PARTY_NOTICES.txt 1,070 B · SHA256SUMS.vz 14,200 B · inject.sh 3,390 B · s6_segments.sh 998 B · vz_modes.conf 312 B · bin/ (13 files, incl. the new `veizik-resident` resident host-loop) · bin_seam/ (1 file) · lib/ (15 libraries) · models/ (model folders) · GPU kernel sets: `ptx/` 17 · `ptx_89/` 17 · `ptx_a80/` 18 · `ptx_h90/` 22 · `ptx_b100a/` 20 · `ptx_b120/` 17 files. 173 files in all. The engine, opener and all six GPU kernel sets are byte-identical to 1.2.2/1.2.3; `bin/wan_s2` is the 1.2.4 fix for CUDA-13.x non-root rendering. The folder keeps the version-stable name `veizik-wan-1.2.0-linux-x86_64` so `veizik activate` resolves the same release id across versions. Verify with `bin/vzseal <folder>` (prints `VZSEAL OK 169`).
-
-**veizik-flux-1.0.4-linux-x86_64.tar** (v1.0.4, sha256 `eb53a459…`, 42,997,760 B)
-Folder `veizik-flux-1.0.4-linux-x86_64/`: veizik · run.sh · PIPELINE.sh · README.txt · MODEL.txt · STAGES.txt · REPRO.md · PROVENANCE.txt · manifest.json · CONFORMANCE.json · SHA256SUMS.vz · vz_modes.conf · semmap · bin/ · lib/ (21) · models/ · and the per-architecture GPU kernel sets: the DiT/compute sets `ptx_c80` · `ptx_86` · `ptx_89` · `ptx_h90` · `ptx_b100` · `ptx_b120`, the text-encoder sets `ptx_textenc_*`, and the low-bit sets `vzw4_*` (sm_80 / sm_86 / sm_89 / sm_90 / sm_100 / sm_120). Every GPU-code module is per-architecture cubin, encrypted at rest. Verify with `bin/vzseal <folder>` (prints `VZSEAL OK 1051`).
