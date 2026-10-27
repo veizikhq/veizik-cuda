@@ -119,7 +119,7 @@ https://veizik.com/benchmarks — every published row names the GPU, model, mode
 
 ## Package contents
 
-**veizik-qwen-cuda-1.1.2-linux-x86_64.tar** (v1.1.1, sha256 `d1f5fd35…`, 59,008,512 B)
+**veizik-qwen-cuda-1.1.2-linux-x86_64.tar** (v1.1.2, sha256 `d1f5fd35…`, 59,008,512 B)
 Top folder `veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86/`: README.txt 1,927 B · install.sh 3,882 B · SHA256SUMS 207,093 B · veizik-x86_64 1,534,320 B · veizik-aarch64 994,728 B · PTXSEAL.prov 124 B · PTXSEAL.prov.sig 64 B · the sealed engine folder of the same name: INTERFACE.json 10,540 B · PIPELINE.sh 108 B · SHA256SUMS.vz 132,541 B · models.json 644 B · models.json.sig 64 B · bin/ (8 files, including the image and video runners) · models/ (5 model folders, per-model metadata) · GPU code, 251 files per architecture: `ptx/` (sm_80) · `ptx_sm86/` · `ptx_sm89/` · `ptx_sm90a/` · `ptx_sm100a/` · `ptx_sm120a/` · image and video stage GPU code, 16 files per architecture: `ptx_vis_sm86/` · `ptx_vis_sm89/` · `ptx_vis_sm120a/`. 1,583 files in all. Verify with `sha256sum -c SHA256SUMS` inside the top folder.
 
 **veizik-wan-1.2.6-linux-x86_64.tar** (v1.2.6, sha256 `1e4e0350…`, 6,973,440 B)
