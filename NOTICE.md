@@ -46,6 +46,15 @@ acceptable-use terms apply to your use of the weights and of what you generate w
 The Wan checkpoints include their umT5-XXL text encoder, tokenizer and Wan VAE, under the
 same licence (<https://huggingface.co/Wan-AI>, <https://github.com/Wan-Video>).
 
+### Wan2.2-Lightning (optional 4-step distillation LoRA) — lightx2v
+The optional Lightning 4-step LoRA weights used by the `wan22_*_a14b_lightning` models are
+USER-SUPPLIED at render time (fetched into the user's weights directory by `veizik pull`); they are
+NOT distributed in this release package.
+- Source: lightx2v — <https://huggingface.co/lightx2v/Wan2.2-Lightning>
+- Weights: Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1, Wan2.2-T2V-A14B-4steps-lora-rank64-Seko-V1.1
+- License: Apache License 2.0 (see upstream LICENSE.txt)
+- The upstream project builds upon and reuses code from Wan2.1 and Wan2.2 (Apache License 2.0).
+
 ## 4. Published methods the WAN engine implements
 
 The WAN engine implements these methods from their publications and reference
