@@ -64,7 +64,6 @@ export PATH="$HOME/.local/bin:$PATH"
 veizik list                           # model engines: installed and available
 veizik install qwen36                 # Qwen package (release v1.1.2)
 veizik install wan22                  # WAN package (release v1.2.4)
-veizik install sd35                   # SD3.5 package (release v1.0.0)
 veizik activate                       # opens veizik.com/activate — approve this machine once
 #   no browser (SSH, servers)? create a key under "Browser-free activation" and a password under "CLI password"
 #   on your account page, then:  veizik activate --key vzek_… --password-stdin < pwfile
@@ -93,7 +92,6 @@ veizik uninstall qwen36               # removes an installed package (alias: vei
 `veizik install` downloads each package and verifies it against its published release digest automatically — there is no separate manual install step. For reference (e.g. to verify a direct download), the published downloads and digests are:
 - `veizik-qwen-cuda-1.1.2-linux-x86_64.tar` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.1.2/veizik-qwen-cuda-1.1.2-linux-x86_64.tar — sha256 `d1f5fd35c950652a31dd70b6dc9baaef67e700f299033e8a83d7f0ab0e6184e6`
 - `veizik-wan-1.2.6-linux-x86_64.tar` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.2.6/veizik-wan-1.2.6-linux-x86_64.tar — sha256 `1e4e0350026c4ed3d6fe2d2980be433bc5d8ef8c2c78fcb7e682842e0a784cd2`
-- `veizik-sd35-1.0.0-linux-x86_64.tar` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.0.0/veizik-sd35-1.0.0-linux-x86_64.tar — sha256 `27dd712364972c286c8bf99e3a003d420061f979b13080ee31e689ccb26a7f99`
 - `veizik-flux-1.0.4-linux-x86_64.tar` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.0.4/veizik-flux-1.0.4-linux-x86_64.tar — sha256 `eb53a4590f3751678e590f9ec93ce0693ef583ebd6e74ecab05ca600cccb5292`
 
 What needs the network: installing a package, creating the account, activating the device and renewing its lease. Generation itself does not.
