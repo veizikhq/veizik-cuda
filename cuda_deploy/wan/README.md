@@ -152,7 +152,7 @@ veizik run wan21_t2v_1_3b "A paper boat on a pond." --out $HOME/clip --resume   
 ```
 ./veizik run <model> --out DIR [--prompt TEXT | --prompt-file FILE] [--neg TEXT | --neg-file FILE]
              [--steps N] [--frames N] [--width W] [--height H] [--guidance G] [--guidance2 G2]
-             [--seed N] [--shift S] [--mode quality|balanced|fast|ultrafast] [--resume yes]
+             [--seed N] [--shift S] [--mode quality|balanced|fast|ultrafast] [--resume]
              [--weights DIR] [--image FILE] [--extend DIR] [--stream yes --window-frames 81 --story FILE ...]
 ```
 
@@ -239,7 +239,7 @@ memory stays at one window's. `--story FILE` drives it with lines of the form `<
 
 - A one-shot render writes its sampler state to `DIR/work/render.vzckpt` after every step
   (`--checkpoint-every N`; `0` = off, which also disables preemption). If it is interrupted (crash,
-  kill, reboot), run the same command again with `--resume yes` and the same `--out`: the run checks
+  kill, reboot), run the same command again with `--resume` and the same `--out`: the run checks
   the render condition against the checkpoint and continues. The result is bit-identical to an
   uninterrupted render.
 - To preempt a running render on purpose, create `DIR/work/preempt` (a stream: `DIR/work/tl/preempt`).
@@ -281,9 +281,8 @@ stay in host RAM after the first load. Results are bit-identical to `./veizik ru
   A refused request prints `VZ_RESIDENT_REFUSED` and is skipped; an expired or replaced licence ends
   the daemon (exit 70).
 - A request with `WAN_PREEMPT=<file>` is preempted at a step boundary when that file appears
-  (`VZ_RESIDENT_PREEMPTED`); post it again with the same `WAN_CKPT` and the request re-renders
-  deterministically to a bit-identical result (as shipped it restarts the render rather than continuing
-  from the checkpoint).
+  (`VZ_RESIDENT_PREEMPTED`); post it again with the same `WAN_CKPT` and the request resumes from its
+  checkpoint, continuing to a bit-identical result.
 - A request cannot change `WAN_PTX`, `VZ_*` or `LD_*` (ignored and logged).
 
 ---
@@ -332,7 +331,7 @@ GPUs run their own kernel sets at speeds not measured.
 | `72` | a device kernel the stage asked for did not load |
 | `73` | cannot create or write in `--out` |
 | `74` | entitlement refused: the lease is valid but its policy does not enable this model, mode or feature, or the policy block is malformed (`VZ_ENTITLEMENT_REFUSED`) |
-| `75` | preempted / yielded (`VZ_PREEMPTED` / `VZ_STREAM_YIELD`); continue with `--resume yes` |
+| `75` | preempted / yielded (`VZ_PREEMPTED` / `VZ_STREAM_YIELD`); continue with `--resume` |
 | `76` | decoded frames carry no signal |
 | `77` | the PNG writer wrote the wrong number of files |
 | `78` | package path unresolvable, or the engine refused a compute variant |
