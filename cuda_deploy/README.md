@@ -4,12 +4,12 @@ This folder holds the support documentation for both NVIDIA / Linux packages in 
 
 | package | release | guide | release notes |
 |---|---|---|---|
-| Qwen3.5 / Qwen3.6 language models — `veizik-qwen-cuda-1.1.0-linux-x86_64.tar` | `v1.1.0` | this file, [`CLI_USAGE.md`](CLI_USAGE.md), [`USAGE_GUIDE.md`](USAGE_GUIDE.md), [`bench/REPRODUCIBILITY.md`](bench/REPRODUCIBILITY.md) | [`RELEASE_NOTES.md`](RELEASE_NOTES.md) |
-| Wan2.1 / Wan2.2 video models — `veizik-wan-1.2.0-linux-x86_64.tar` | `v1.2.0` | [`wan/README.md`](wan/README.md) | [`wan/RELEASE_NOTES.md`](wan/RELEASE_NOTES.md) |
+| Qwen3.5 / Qwen3.6 language models — `veizik-qwen-cuda-1.1.3-linux-x86_64.vzpack` | `v1.1.3` | this file, [`CLI_USAGE.md`](CLI_USAGE.md), [`USAGE_GUIDE.md`](USAGE_GUIDE.md), [`bench/REPRODUCIBILITY.md`](bench/REPRODUCIBILITY.md) | [`RELEASE_NOTES.md`](RELEASE_NOTES.md) |
+| Wan2.1 / Wan2.2 video models — `veizik-wan-1.2.8-linux-x86_64.tar` | `v1.2.8` | [`wan/README.md`](wan/README.md) | [`wan/RELEASE_NOTES.md`](wan/RELEASE_NOTES.md) |
 
 The rest of this file covers the Qwen package.
 
-## veizik-cuda 1.1.0 (Qwen3.5 / Qwen3.6)
+## veizik-cuda 1.1.3 (Qwen3.5 / Qwen3.6)
 
 Veizik runs the Qwen3.5 (0.8B, 2B, 4B, 9B) and Qwen3.6-35B-A3B language models **on your own NVIDIA
 GPU** through its own native engine: per-architecture native CUDA code, no Python runtime,
@@ -29,11 +29,11 @@ over HTTP, and a reproducible benchmark set.
 
 | Item | Value |
 |---|---|
-| Product | `veizik-cuda 1.1.0 (Qwen3.5 / Qwen3.6)` |
-| Package | `veizik-qwen-cuda-1.1.0-linux-x86_64.tar` (58,573,312 B) |
-| Package SHA-256 | `d38f30780b873bac616b5b1e7e54a47ee6e8c9dcb5ad18fe47d86a6457852a54` (short form `d38f3078`) |
-| Supersedes | `veizik-cuda 1.0.0`. 1.1.0 adds image and video input on Qwen3.6-35B-A3B; the five text models are unchanged |
-| CLI version (`veizik version`) | `1.4.3` — the same CLI serves the Qwen and the WAN package; the engine is x86-64 only |
+| Product | `veizik-cuda 1.1.3 (Qwen3.5 / Qwen3.6)` |
+| Package | `veizik-qwen-cuda-1.1.3-linux-x86_64.vzpack` (56,552,565 B) — a single-file `.vzpack` with a signed `.vzindex` |
+| Package SHA-256 | `0fcee30fc61a27c1a84b600b2a26521d8ffe0eed76b531320c16414232f367e5` (short form `0fcee30f`) |
+| Supersedes | `veizik-cuda 1.1.2`. 1.1.3 adds advisory per-license policy groundwork (it does not restrict which models run); same model capability and the same device-license behavior as 1.1.2. (Image and video input on Qwen3.6-35B-A3B was added in 1.1.0.) |
+| CLI version (`veizik version`) | `1.5.27` — the same CLI serves the Qwen and the WAN package; the engine is x86-64 only |
 | Backend | `CUDA` (native kernels, one set per GPU architecture) |
 | Signing | engine files integrity-sealed and checked at every start; the release catalogue is signed with Veizik's production code-signing key and can be verified with the bundled public key |
 | GPU architectures | `sm_80` / `sm_86` / `sm_89` / `sm_90a` / `sm_100a` / `sm_120a` — GPU code ships as per-architecture cubin (SASS); the loader does no JIT. The image and video stage ships GPU code for `sm_86`, `sm_89` and `sm_120a` |

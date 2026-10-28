@@ -7,7 +7,7 @@ inference time. You supply the weights; nothing leaves the machine.
 - Package: `veizik-qwen-cuda-1.1.0-linux-x86_64.tar`  ·  SHA-256 `d38f30780b873bac616b5b1e7e54a47ee6e8c9dcb5ad18fe47d86a6457852a54`  ·  58,573,312 B  ·  CLI `1.2.0` (x86_64 build `9b000b81`, aarch64 build `af92fd50`)  ·  backend CUDA
 - Supported: `qwen35_0p8b`, `qwen35_2b`, `qwen35_4b`, `qwen35_9b`, `qwen36_35b_a3b`  ·  Hardware: NVIDIA compute capability 8.0+ — `sm_80` / `sm_86` / `sm_89` / `sm_90a` / `sm_100a` / `sm_120a`
 - GPU code ships as per-architecture **cubin (SASS)**; the loader does no JIT
-- Install: `echo "d38f30780b873bac616b5b1e7e54a47ee6e8c9dcb5ad18fe47d86a6457852a54  veizik-qwen-cuda-1.1.0-linux-x86_64.tar" | sha256sum -c - && tar xf veizik-qwen-cuda-1.1.0-linux-x86_64.tar && cd veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86 && ./install.sh`   (full guide: [README](README.md))
+- Install: `veizik install qwen36` — the current release ships as a single-file `.vzpack`, downloaded and sha-checked against the release `SHA256SUMS` automatically (full guide: [README](README.md))
 - Benchmarks: Veizik's own measured figures — [bench/REPRODUCIBILITY.md](bench/REPRODUCIBILITY.md)  (reproduce: [bench/repro_kit/](bench/repro_kit/))
 - Licence: install + evaluation free; production use licensed. Terms: Veizik Terms of Service, "License & entitlement" (https://veizik.com/terms), and the Veizik distribution licence ([`LICENSE`](../LICENSE)) with the third-party notices ([`NOTICE.md`](../NOTICE.md)) at the root of this repository ([README](README.md) §6).
 - Supersedes: `veizik-cuda 1.0.0`.
