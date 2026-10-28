@@ -1,0 +1,5 @@
+# Repo language statistics: veizik-cuda is a native CUDA engine, not a Python
+# project. The only .py file is a benchmark-reproduction helper; keep the whole
+# repro kit (and any stray .py helper) out of GitHub's language bar.
+cuda_deploy/bench/repro_kit/** linguist-vendored
+*.py linguist-vendored
