@@ -72,7 +72,7 @@ where it matters in
 curl -fsSL https://veizik.com/install.sh | sh   # installs the veizik command only, sha-checked against this repository's SHA256SUMS
 export PATH="$HOME/.local/bin:$PATH"
 veizik list                     # model engines: installed and available
-veizik install qwen36           # this package (release v1.1.0)
+veizik install qwen36           # this package (release v1.1.3)
 veizik version                  # the CLI version and backend
 veizik doctor                   # root, backend, activation service, integrity of the CLI binary
 ```
@@ -81,8 +81,7 @@ veizik doctor                   # root, backend, activation service, integrity o
   repository's `SHA256SUMS`; on macOS it points you to the Apple disk image instead.
 - Install names are keywords: the Qwen package is `qwen`, `qwen35`, `qwen36` or any of its model keys (`qwen35_0p8b`, `qwen35_2b`, `qwen35_4b`, `qwen35_9b`, `qwen36_35b_a3b`); the WAN package is `wan`, `wan21`, `wan22` or any of its model keys (`wan21_t2v_1_3b`, `wan21_t2v_14b`, `wan22_t2v_a14b`, `wan22_i2v_a14b`). Case does not matter, and `.` or `-` may stand for `_`.
 - `veizik install` downloads the package anonymously from this repository's release, refuses it if
-  its sha256 differs from the published release digest
-  (`d38f30780b873bac616b5b1e7e54a47ee6e8c9dcb5ad18fe47d86a6457852a54`), and extracts it to
+  its sha256 differs from the published release digest, and installs it to
   `${XDG_STATE_HOME:-~/.local/state}/veizik/engines/<model>/`. It refuses to run on macOS. `veizik run`,
   `chat` and `serve` find the installed engine themselves.
 - `veizik uninstall qwen36` (alias `veizik rm`) removes the installed package. `veizik update` exists
@@ -93,24 +92,15 @@ veizik doctor                   # root, backend, activation service, integrity o
 
 Uninstall: `veizik uninstall qwen36`. To free this device's slot on your licence, use `veizik devices disable <tag>` (§3).
 
-### Manual install (the package's tarball)
+### Installing the package
 
-```bash
-echo "d38f30780b873bac616b5b1e7e54a47ee6e8c9dcb5ad18fe47d86a6457852a54  veizik-qwen-cuda-1.1.0-linux-x86_64.tar" | sha256sum -c -
-# must print: veizik-qwen-cuda-1.1.0-linux-x86_64.tar: OK
-tar xf veizik-qwen-cuda-1.1.0-linux-x86_64.tar
-cd veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86
-./install.sh                  # installs under ~/.local/lib/veizik and puts `veizik` in ~/.local/bin
-./install.sh /opt/veizik      # or under a directory of your choice
-```
-
-The folder name is fixed by the release identity that activation uses — do not rename it. It
-contains GPU code for all six architectures, whatever its name suggests. The installer checks the
-`veizik` command against `SHA256SUMS` and the engine against its own integrity seal on a staging copy
-**before** anything replaces an existing install. The destination may contain only letters, digits
-and `/ . _ - ~ + @ :` and spaces. After a manual install the engine folder is
-`~/.local/lib/veizik/veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86` (use it as `VEIZIK_ROOT`); to
-remove it, delete `~/.local/bin/veizik` and the folders under `~/.local/lib/veizik`.
+The Qwen package ships as a single content-addressed `.vzpack` file. `veizik install qwen`
+downloads it from this repository's release, verifies it against the published `SHA256SUMS` digest
+and its signed `.vzindex`, and materialises the engine folder under
+`${XDG_STATE_HOME:-~/.local/state}/veizik/engines/<model>/`. There is no separate manual download or
+unpack step. The folder name is fixed by the release identity that activation uses — do not rename
+it, and it contains GPU code for all six architectures whatever its name suggests. If the CLI reports
+`no Veizik NVIDIA engine here`, set `VEIZIK_ROOT` to the engine folder `veizik install` printed.
 
 ### System requirements
 
