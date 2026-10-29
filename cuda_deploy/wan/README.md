@@ -15,9 +15,9 @@ The Qwen language package has its own guide: [`../README.md`](../README.md).
 
 | Item | Value |
 |---|---|
-| Release | `v1.2.0` — veizik-wan 1.2.0 |
-| Package | `veizik-wan-1.2.0-linux-x86_64.tar` |
-| Package SHA-256 | `8a594e6587db6259175936d60e1604a2156d4835e72dcc458dcc685783e8b027` |
+| Release | `v1.2.8` — veizik-wan 1.2.8 |
+| Package | `veizik-wan-1.2.8-linux-x86_64.vzpack` |
+| Package SHA-256 | `3fbe53c3bedb9158b00b0e1ab9a605af58a9ed5d201cefd2c0bad717ebc3d047` |
 | Size | 7,112,192 B, 172 files |
 | Host | Linux x86-64 with an NVIDIA GPU and its driver (`libcuda.so.1`). No Python, no framework, no CUDA toolkit |
 | GPU code | precompiled kernel sets, sealed at rest, one per architecture: `sm_80`, `sm_86`, `sm_89`, `sm_90a`, `sm_100a` and `sm_120a`. The launcher picks the set for the GPU it finds |
@@ -68,15 +68,12 @@ refuses the download if its sha256 differs from the published digest below. Ever
 [`../CLI_USAGE.md`](../CLI_USAGE.md). `veizik update` and `veizik convert` exist but are not functional
 yet.
 
-**From the tarball by hand.**
+**With `veizik install` (single-file `.vzpack`).**
 
 ```bash
-curl -LO https://github.com/veizikhq/veizik-cuda/releases/download/v1.2.0/veizik-wan-1.2.0-linux-x86_64.tar
-echo "8a594e6587db6259175936d60e1604a2156d4835e72dcc458dcc685783e8b027  veizik-wan-1.2.0-linux-x86_64.tar" | sha256sum -c -
-# must print: veizik-wan-1.2.0-linux-x86_64.tar: OK
-tar xf veizik-wan-1.2.0-linux-x86_64.tar
-cd veizik-wan-1.2.0-linux-x86_64
-bin/vzseal "$PWD"        # integrity check by hand: prints VZSEAL OK <n>, exit 0
+veizik install wan22     # downloads veizik-wan-1.2.8-linux-x86_64.vzpack, sha-checks it against the release SHA256SUMS, verifies its signed index, and materializes the engine folder
+cd "$(veizik where wan22 2>/dev/null || echo .)"
+bin/vzseal "$PWD"        # optional by-hand integrity check inside the materialized folder: prints VZSEAL OK <n>, exit 0
 ```
 
 A hand-unpacked package runs from the folder you unpacked; it has no installer. Do not add, remove or edit files

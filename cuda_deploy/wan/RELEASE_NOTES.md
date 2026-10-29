@@ -4,10 +4,10 @@
 the models through its own native engine — no Python, no framework, no CUDA toolkit, no cloud at render
 time. You supply the weights; prompts and frames stay on the machine.
 
-- Package: `veizik-wan-1.2.0-linux-x86_64.tar`  ·  SHA-256 `8a594e6587db6259175936d60e1604a2156d4835e72dcc458dcc685783e8b027`  ·  7,112,192 B
+- Package: `veizik-wan-1.2.8-linux-x86_64.vzpack`  ·  SHA-256 `3fbe53c3bedb9158b00b0e1ab9a605af58a9ed5d201cefd2c0bad717ebc3d047`  ·  6,851,149 B
 - Models: `wan21_t2v_1_3b`, `wan21_t2v_14b`, `wan22_t2v_a14b`, `wan22_i2v_a14b`
 - Hardware: Linux x86-64, NVIDIA GPU with a precompiled kernel set, one per architecture: `sm_80`, `sm_86`, `sm_89`, `sm_90a`, `sm_100a` and `sm_120a`
-- Install: `echo "8a594e6587db6259175936d60e1604a2156d4835e72dcc458dcc685783e8b027  veizik-wan-1.2.0-linux-x86_64.tar" | sha256sum -c - && tar xf veizik-wan-1.2.0-linux-x86_64.tar && cd veizik-wan-1.2.0-linux-x86_64` (full guide: [README](README.md))
+- Install: `veizik install wan22` — downloads the single-file `.vzpack`, sha-checks it against the release `SHA256SUMS`, verifies its signed index, and materializes the engine folder (full guide: [README](README.md))
 - Licence: install + evaluation free; production use licensed. Terms: Veizik Terms of Service (https://veizik.com/terms) and the Veizik distribution licence ([`LICENSE`](../../LICENSE)); third-party works in [`NOTICE.md`](../../NOTICE.md).
 
 Install and run with the `veizik` command (CLI 1.4.3): `veizik install wan22`, `veizik activate` (one approval covers every installed model), then `veizik run wan22_t2v_a14b "<prompt>" --out $HOME/clip`; the full command reference is [`../CLI_USAGE.md`](../CLI_USAGE.md). A package unpacked by hand carries no activation tool of its own; contact support@veizik.com to activate it. Activation does not need the model weights; rendering does. The weights folder needs a prepared `vae/` decoder layout (`vae/manifest.txt`) that the package cannot make from the published checkpoint; contact support@veizik.com for it too.

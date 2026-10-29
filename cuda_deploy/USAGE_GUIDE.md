@@ -344,7 +344,7 @@ What you can do:
 | exit `3`, "weights for `<model>` … not found. Looked in:" | no complete checkpoint of that model | download the full snapshot (config, tokenizer, every weight file) and use `VZ_WEIGHTS` or the Hugging Face cache (`--weights` on `serve`), or `veizik pull <model>` |
 | exit `3` from `serve`: "could not find the weights … tokenizer.json and tokenizer_config.json" | `serve` needs the checkpoint folder itself, with both tokenizer files | pass `--weights <checkpoint folder>` or set `VZ_WEIGHTS` to that folder (not its parent) |
 | `the checkpoint has no tokenizer.json` (exit 3) | a text prompt needs the tokenizer file | download the complete snapshot |
-| exit `4` `VZ_PTX_BOOT_FAIL` | the engine failed its integrity check, or its GPU modules did not open | reinstall from the tarball after verifying its SHA-256; never edit the installed folder |
+| exit `4` `VZ_PTX_BOOT_FAIL` | the engine failed its integrity check, or its GPU modules did not open | reinstall with `veizik install` (it re-downloads and re-verifies the published digest); never edit the installed folder |
 | exit `2` "cannot read the GPU compute capability" / "GPUs with different compute capabilities" / "unusable compute capability" | `nvidia-smi` is missing, or the GPUs differ | `export Q35_SEAL_ARCH=sm86` (or `sm80`, `sm89`, `sm90a`, `sm100a`, `sm120a`) to match your GPU |
 | "compute capability N.M has no kernel set in this bundle" | your GPU architecture is not in this package | supported: 8.0, 8.6, 8.9, 9.0, 10.0, 12.0 |
 | exit `2` "unknown option … for run." | a misspelt or unsupported option | check [`CLI_USAGE.md`](CLI_USAGE.md); options are exact |
