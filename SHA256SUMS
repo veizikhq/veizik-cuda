@@ -1,6 +1,7 @@
 0fcee30fc61a27c1a84b600b2a26521d8ffe0eed76b531320c16414232f367e5  veizik-qwen-cuda-1.1.3-linux-x86_64.vzpack
 829f853b945dd6fe403a3c63378fb76ffe5459a65296718d22b0483c4c1db51c  veizik-shared-core.vzroot
 3fbe53c3bedb9158b00b0e1ab9a605af58a9ed5d201cefd2c0bad717ebc3d047  veizik-wan-1.2.8-linux-x86_64.vzpack
+ec21840bb29e63284743c92b5c19ae4bacef7e4cd07ddc17e78192d1b1b1cadb  veizik-wan-1.2.91-linux-x86_64.vzpack
 874bf6a41555ef791429e4863c60b126cdc5699b10ffc6f3d7aa21dd72e516a0  veizik-linux-x86_64
 e316641436b5516a49015a33bbcdc20fc62df011e4db2218b18ca39741d0f6fe  veizik-linux-aarch64
 f050d00bfb61ad059d39d78d69ddef9a92b7131c9d4d9c8b9aa660b5ae745933  veizik-darwin-arm64
