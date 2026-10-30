@@ -36,7 +36,7 @@ $ veizik serve wan21_t2v_1_3b --port 8000      # render API: POST /v1/videos/gen
 
 All five models are marked EXPERIMENTAL in the signed model catalogue. Memory is measured after load with text input on an RTX 5090, on the 1.0.0 build; long prompts, images, video and serving need more. Image and video input is an option of the package's launcher for Qwen3.6-35B-A3B only: one PNG or JPEG image, or one folder of 2–256 PNG or JPEG frames, per run, together with a text prompt. The image and video stage ships GPU code for `sm_86`, `sm_89` and `sm_120a`. On a GPU the image and video stage does not support, the run is refused cleanly with code 50 (`the image stage refused this request (status 50)`) before any image or video work. Validation ran on RTX 3090, RTX A5000, RTX 4090 and RTX 5090; the `sm_80`, `sm_90a` and `sm_100a` GPU code is included but was not run in validation.
 
-**Video — veizik-wan 1.2.8** (4 models in one package, with a resident render server and mid-render preempt)
+**Video — veizik-wan 1.2.91** (4 models in one package, with a resident render server and mid-render preempt)
 
 | Model key | Model | Hugging Face checkpoint | Task | Defaults (size · frames · steps) |
 |---|---|---|---|---|
@@ -56,7 +56,7 @@ curl -fsSL https://veizik.com/install.sh | sh   # installs the veizik command on
 export PATH="$HOME/.local/bin:$PATH"
 veizik list                           # model engines: installed and available
 veizik install qwen36                 # Qwen package (release v1.1.3)
-veizik install wan22                  # WAN package (release v1.2.8)
+veizik install wan22                  # WAN package (release v1.2.91)
 veizik activate                       # opens veizik.com/activate — approve this machine once
 #   no browser (SSH, servers)? create a key under "Browser-free activation" and a password under "CLI password"
 #   on your account page, then:  veizik activate --key vzek_… --password-stdin < pwfile
@@ -85,7 +85,7 @@ veizik uninstall qwen36               # removes an installed package (alias: vei
 `veizik install` downloads each package and verifies it against its published release digest automatically — there is no separate manual install step. For reference (e.g. to verify a direct download), the published downloads and digests are:
 - `veizik-qwen-cuda-1.1.3-linux-x86_64.vzpack` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.1.3/veizik-qwen-cuda-1.1.3-linux-x86_64.vzpack — sha256 `0fcee30fc61a27c1a84b600b2a26521d8ffe0eed76b531320c16414232f367e5`
 - `veizik-shared-core.vzroot` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.1.3/veizik-shared-core.vzroot — sha256 `829f853b945dd6fe403a3c63378fb76ffe5459a65296718d22b0483c4c1db51c`
-- `veizik-wan-1.2.8-linux-x86_64.vzpack` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.2.8/veizik-wan-1.2.8-linux-x86_64.vzpack — sha256 `3fbe53c3bedb9158b00b0e1ab9a605af58a9ed5d201cefd2c0bad717ebc3d047`
+- `veizik-wan-1.2.91-linux-x86_64.vzpack` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.2.91/veizik-wan-1.2.91-linux-x86_64.vzpack — sha256 `ec21840bb29e63284743c92b5c19ae4bacef7e4cd07ddc17e78192d1b1b1cadb`
 
 What needs the network: installing a package, creating the account, activating the device and renewing its lease. Generation itself does not.
 
@@ -113,8 +113,8 @@ https://veizik.com/benchmarks — every published row names the GPU, model, mode
 **veizik-qwen-cuda-1.1.3-linux-x86_64.vzpack** (v1.1.3, sha256 `0fcee30f…`, 56,552,565 B)
 A single-file `.vzpack` (content-addressed, with a signed `.vzindex`) that `veizik install qwen` verifies against the published digest and materializes to the engine folder `veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86/`: README.txt 1,927 B · install.sh 3,882 B · SHA256SUMS 207,093 B · veizik-x86_64 1,534,320 B · veizik-aarch64 994,728 B · PTXSEAL.prov 124 B · PTXSEAL.prov.sig 64 B · the sealed engine folder of the same name: INTERFACE.json 10,540 B · PIPELINE.sh 108 B · SHA256SUMS.vz 132,541 B · models.json 644 B · models.json.sig 64 B · bin/ (8 files, including the image and video runners) · models/ (5 model folders, per-model metadata) · GPU code, 251 files per architecture: `ptx/` (sm_80) · `ptx_sm86/` · `ptx_sm89/` · `ptx_sm90a/` · `ptx_sm100a/` · `ptx_sm120a/` · image and video stage GPU code, 16 files per architecture: `ptx_vis_sm86/` · `ptx_vis_sm89/` · `ptx_vis_sm120a/`. 1,583 files in all. Verify with `sha256sum -c SHA256SUMS` inside the top folder.
 
-**veizik-wan-1.2.8-linux-x86_64.vzpack** (v1.2.8, sha256 `3fbe53c3…`, 6,851,149 B)
+**veizik-wan-1.2.91-linux-x86_64.vzpack** (v1.2.91, sha256 `ec21840b…`, 7,007,814 B)
 A single-file `.vzpack` (content-addressed, signed `.vzindex`, shared-core `veizik-shared-core.vzroot`) that `veizik install wan22` verifies against the published digest, checks its signed index and materializes to the engine folder. Same sealed engine and all six per-architecture GPU kernel sets (identical engine; all-architecture support).
 
 **Engine folder** (materialized from the `.vzpack` by `veizik install wan22`)
-PTXSEAL.prov 124 B · PTXSEAL.prov.sig 64 B · folder `veizik-wan-1.2.0-linux-x86_64/`: veizik 4,329 B · PIPELINE.sh 48,411 B · README.txt 8,307 B · MODEL.txt 418 B · STAGES.txt 1,239 B · INTERFACE.json 22,444 B · manifest.json 416 B · CONFORMANCE.json 4,099 B · REPRO.md 670 B · PROVENANCE.txt 483 B · THIRD_PARTY_NOTICES.txt 1,070 B · SHA256SUMS.vz 14,200 B · inject.sh 3,390 B · s6_segments.sh 998 B · vz_modes.conf 312 B · bin/ (13 files, incl. the new `veizik-resident` resident host-loop) · bin_seam/ (1 file) · lib/ (15 libraries) · models/ (model folders) · GPU kernel sets: `ptx/` 17 · `ptx_89/` 17 · `ptx_a80/` 18 · `ptx_h90/` 22 · `ptx_b100a/` 20 · `ptx_b120/` 17 files. 173 files in all. The engine, opener and all six GPU kernel sets are byte-identical to 1.2.2/1.2.3; `bin/wan_s2` is the 1.2.4 fix for CUDA-13.x non-root rendering. The folder keeps the version-stable name `veizik-wan-1.2.0-linux-x86_64` so `veizik activate` resolves the same release id across versions. Verify with `bin/vzseal <folder>` (prints `VZSEAL OK 169`).
+PTXSEAL.prov 124 B · PTXSEAL.prov.sig 64 B · folder `veizik-wan-1.2.0-linux-x86_64/`: veizik 4,329 B · PIPELINE.sh 48,537 B · README.txt 8,307 B · MODEL.txt 418 B · STAGES.txt 1,239 B · INTERFACE.json 22,444 B · manifest.json 416 B · CONFORMANCE.json 4,099 B · REPRO.md 670 B · PROVENANCE.txt 483 B · THIRD_PARTY_NOTICES.txt 1,070 B · SHA256SUMS.vz 14,702 B · inject.sh 3,390 B · s6_segments.sh 998 B · vz_modes.conf 312 B · bin/ (13 files, incl. the new `veizik-resident` resident host-loop) · bin_seam/ (1 file) · lib/ (15 libraries) · models/ (model folders) · GPU kernel sets: `ptx/` 18 · `ptx_89/` 18 · `ptx_a80/` 19 · `ptx_h90/` 23 · `ptx_b100a/` 21 · `ptx_b120/` 18 files. 177 files in all. The 1.2.91 engine is the Wan 2.2 i2v Lightning LoRA forward-correction (fused int8 mma, `lib/libvzwan.so`) and each of the six GPU kernel sets gains one new LoRA kernel; the opener, `bin/wan_s2` (the 1.2.4 CUDA-13.x non-root fix) and every other kernel are byte-identical to 1.2.8. The folder keeps the version-stable name `veizik-wan-1.2.0-linux-x86_64` so `veizik activate` resolves the same release id across versions. Verify with `bin/vzseal <folder>` (prints `VZSEAL OK 175`).

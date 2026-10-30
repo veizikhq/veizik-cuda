@@ -4,7 +4,7 @@
 the models through its own native engine — no Python, no framework, no CUDA toolkit, no cloud at render
 time. You supply the weights; prompts and frames stay on the machine.
 
-- Package: `veizik-wan-1.2.8-linux-x86_64.vzpack`  ·  SHA-256 `3fbe53c3bedb9158b00b0e1ab9a605af58a9ed5d201cefd2c0bad717ebc3d047`  ·  6,851,149 B
+- Package: `veizik-wan-1.2.91-linux-x86_64.vzpack`  ·  SHA-256 `ec21840bb29e63284743c92b5c19ae4bacef7e4cd07ddc17e78192d1b1b1cadb`  ·  7,007,814 B
 - Models: `wan21_t2v_1_3b`, `wan21_t2v_14b`, `wan22_t2v_a14b`, `wan22_i2v_a14b`
 - Hardware: Linux x86-64, NVIDIA GPU with a precompiled kernel set, one per architecture: `sm_80`, `sm_86`, `sm_89`, `sm_90a`, `sm_100a` and `sm_120a`
 - Install: `veizik install wan22` — downloads the single-file `.vzpack`, sha-checks it against the release `SHA256SUMS`, verifies its signed index, and materializes the engine folder (full guide: [README](README.md))

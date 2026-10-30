@@ -5,7 +5,7 @@ This folder holds the support documentation for both NVIDIA / Linux packages in 
 | package | release | guide | release notes |
 |---|---|---|---|
 | Qwen3.5 / Qwen3.6 language models — `veizik-qwen-cuda-1.1.3-linux-x86_64.vzpack` | `v1.1.3` | this file, [`CLI_USAGE.md`](CLI_USAGE.md), [`USAGE_GUIDE.md`](USAGE_GUIDE.md), [`bench/REPRODUCIBILITY.md`](bench/REPRODUCIBILITY.md) | [`RELEASE_NOTES.md`](RELEASE_NOTES.md) |
-| Wan2.1 / Wan2.2 video models — `veizik-wan-1.2.8-linux-x86_64.vzpack` | `v1.2.8` | [`wan/README.md`](wan/README.md) | [`wan/RELEASE_NOTES.md`](wan/RELEASE_NOTES.md) |
+| Wan2.1 / Wan2.2 video models — `veizik-wan-1.2.91-linux-x86_64.vzpack` | `v1.2.91` | [`wan/README.md`](wan/README.md) | [`wan/RELEASE_NOTES.md`](wan/RELEASE_NOTES.md) |
 
 The rest of this file covers the Qwen package.
 

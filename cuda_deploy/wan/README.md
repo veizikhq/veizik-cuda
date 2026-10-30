@@ -15,9 +15,9 @@ The Qwen language package has its own guide: [`../README.md`](../README.md).
 
 | Item | Value |
 |---|---|
-| Release | `v1.2.8` — veizik-wan 1.2.8 |
-| Package | `veizik-wan-1.2.8-linux-x86_64.vzpack` |
-| Package SHA-256 | `3fbe53c3bedb9158b00b0e1ab9a605af58a9ed5d201cefd2c0bad717ebc3d047` |
+| Release | `v1.2.91` — veizik-wan 1.2.91 |
+| Package | `veizik-wan-1.2.91-linux-x86_64.vzpack` |
+| Package SHA-256 | `ec21840bb29e63284743c92b5c19ae4bacef7e4cd07ddc17e78192d1b1b1cadb` |
 | Size | 7,112,192 B, 172 files |
 | Host | Linux x86-64 with an NVIDIA GPU and its driver (`libcuda.so.1`). No Python, no framework, no CUDA toolkit |
 | GPU code | precompiled kernel sets, sealed at rest, one per architecture: `sm_80`, `sm_86`, `sm_89`, `sm_90a`, `sm_100a` and `sm_120a`. The launcher picks the set for the GPU it finds |
@@ -71,7 +71,7 @@ yet.
 **With `veizik install` (single-file `.vzpack`).**
 
 ```bash
-veizik install wan22     # downloads veizik-wan-1.2.8-linux-x86_64.vzpack, sha-checks it against the release SHA256SUMS, verifies its signed index, and materializes the engine folder
+veizik install wan22     # downloads veizik-wan-1.2.91-linux-x86_64.vzpack, sha-checks it against the release SHA256SUMS, verifies its signed index, and materializes the engine folder
 cd "$(veizik where wan22 2>/dev/null || echo .)"
 bin/vzseal "$PWD"        # optional by-hand integrity check inside the materialized folder: prints VZSEAL OK <n>, exit 0
 ```
