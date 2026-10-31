@@ -55,7 +55,7 @@ Step 1 installs the `veizik` command (the latest release); it then installs the 
 curl -fsSL https://veizik.com/install.sh | sh   # installs the veizik command only, sha-checked against this repository's SHA256SUMS
 export PATH="$HOME/.local/bin:$PATH"
 veizik list                           # model engines: installed and available
-veizik install qwen36                 # Qwen package (release v1.1.3)
+veizik install qwen36                 # Qwen package (release v1.1.4)
 veizik install wan22                  # WAN package (release v1.2.92)
 veizik activate                       # opens veizik.com/activate — approve this machine once
 #   no browser (SSH, servers)? create a key under "Browser-free activation" and a password under "CLI password"
@@ -83,8 +83,8 @@ veizik uninstall qwen36               # removes an installed package (alias: vei
 
 ### Checksums (published release digests)
 `veizik install` downloads each package and verifies it against its published release digest automatically — there is no separate manual install step. For reference (e.g. to verify a direct download), the published downloads and digests are:
-- `veizik-qwen-cuda-1.1.3-linux-x86_64.vzpack` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.1.3/veizik-qwen-cuda-1.1.3-linux-x86_64.vzpack — sha256 `0fcee30fc61a27c1a84b600b2a26521d8ffe0eed76b531320c16414232f367e5`
-- `veizik-shared-core.vzroot` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.1.3/veizik-shared-core.vzroot — sha256 `829f853b945dd6fe403a3c63378fb76ffe5459a65296718d22b0483c4c1db51c`
+- `veizik-qwen-cuda-1.1.4-linux-x86_64.vzpack` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.1.4/veizik-qwen-cuda-1.1.4-linux-x86_64.vzpack — sha256 `0d925ad92f450e833367834924e4d5d078edab7c546499e214f17b476a930f5e`
+- `veizik-shared-core.vzroot` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.1.4/veizik-shared-core.vzroot — sha256 `829f853b945dd6fe403a3c63378fb76ffe5459a65296718d22b0483c4c1db51c`
 - `veizik-wan-1.2.92-linux-x86_64.vzpack` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.2.92/veizik-wan-1.2.92-linux-x86_64.vzpack — sha256 `940318320e2e6dc59295f0acebf62c56830ad732df158a6b74859a36bc5c7249`
 
 What needs the network: installing a package, creating the account, activating the device and renewing its lease. Generation itself does not.
@@ -110,8 +110,8 @@ https://veizik.com/benchmarks — every published row names the GPU, model, mode
 
 ## Package contents
 
-**veizik-qwen-cuda-1.1.3-linux-x86_64.vzpack** (v1.1.3, sha256 `0fcee30f…`, 56,552,565 B)
-A single-file `.vzpack` (content-addressed, with a signed `.vzindex`) that `veizik install qwen36` verifies against the published digest and materializes to the engine folder `veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86/`: README.txt 1,927 B · install.sh 3,882 B · SHA256SUMS 207,093 B · veizik-x86_64 1,534,320 B · veizik-aarch64 994,728 B · PTXSEAL.prov 124 B · PTXSEAL.prov.sig 64 B · the sealed engine folder of the same name: INTERFACE.json 10,540 B · PIPELINE.sh 108 B · SHA256SUMS.vz 132,541 B · models.json 644 B · models.json.sig 64 B · bin/ (8 files, including the image and video runners) · models/ (5 model folders, per-model metadata) · GPU code, 251 files per architecture: `ptx/` (sm_80) · `ptx_sm86/` · `ptx_sm89/` · `ptx_sm90a/` · `ptx_sm100a/` · `ptx_sm120a/` · image and video stage GPU code, 16 files per architecture: `ptx_vis_sm86/` · `ptx_vis_sm89/` · `ptx_vis_sm120a/`. 1,583 files in all. Verify with `sha256sum -c SHA256SUMS` inside the top folder.
+**veizik-qwen-cuda-1.1.4-linux-x86_64.vzpack** (v1.1.4, sha256 `0d925ad9…`, 56,694,883 B)
+A single-file `.vzpack` (content-addressed, with a signed `.vzindex`) that `veizik install qwen36` verifies against the published digest and materializes to the engine folder `veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86/`: README.txt 1,927 B · install.sh 12,866 B · SHA256SUMS 207,093 B · veizik-x86_64 1,927,696 B · veizik-aarch64 1,242,696 B · PTXSEAL.prov 124 B · PTXSEAL.prov.sig 64 B · the sealed engine folder of the same name: INTERFACE.json 10,540 B · PIPELINE.sh 108 B · SHA256SUMS.vz 132,541 B · models.json 644 B · models.json.sig 64 B · bin/ (8 files, including the image and video runners) · models/ (5 model folders, per-model metadata) · GPU code, 251 files per architecture: `ptx/` (sm_80) · `ptx_sm86/` · `ptx_sm89/` · `ptx_sm90a/` · `ptx_sm100a/` · `ptx_sm120a/` · image and video stage GPU code, 16 files per architecture: `ptx_vis_sm86/` · `ptx_vis_sm89/` · `ptx_vis_sm120a/`. 1,583 files in all. Verify with `sha256sum -c SHA256SUMS` inside the top folder.
 
 **veizik-wan-1.2.92-linux-x86_64.vzpack** (v1.2.92, sha256 `94031832…`, 6,970,958 B)
 A single-file `.vzpack` (content-addressed, signed `.vzindex`, shared-core `veizik-shared-core.vzroot`) that `veizik install wan22` verifies against the published digest, checks its signed index and materializes to the engine folder. Same sealed engine and all six per-architecture GPU kernel sets (identical engine; all-architecture support).
