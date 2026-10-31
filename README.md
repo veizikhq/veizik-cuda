@@ -24,7 +24,7 @@ $ veizik serve wan21_t2v_1_3b --port 8000      # render API: POST /v1/videos/gen
 - Every device is activated once (https://veizik.com/activate). The engines open their GPU code only on an activated device.
 - Model weights are not included. You download each checkpoint from its publisher, under the publisher's licence.
 
-**Language — veizik-qwen-cuda 1.1.3** (5 models in one package)
+**Language — veizik-qwen-cuda 1.1.4** (5 models in one package)
 
 | Model key | Model | Hugging Face checkpoint | Chat | Image and video input | Resident GPU memory, `balanced` |
 |---|---|---|---|---|---|
