@@ -43,7 +43,7 @@ Shipped models (pass the **model key** to the CLI):
 
 | model key | model | Hugging Face repository | notes |
 |---|---|---|---|
-| `qwen35_0p8b` | Qwen3.5-0.8B | `Qwen/Qwen3.5-0.8B` | also used by the activation check |
+| `qwen35_0p8b` | Qwen3.5-0.8B | `Qwen/Qwen3.5-0.8B` | |
 | `qwen35_2b` | Qwen3.5-2B | `Qwen/Qwen3.5-2B` | |
 | `qwen35_4b` | Qwen3.5-4B | `Qwen/Qwen3.5-4B` | |
 | `qwen35_9b` | Qwen3.5-9B | `Qwen/Qwen3.5-9B` | |
@@ -154,10 +154,7 @@ Activation binds the install to **this machine**. It is per device, not per mode
 covers all five models. The device key is generated on this machine, stored with mode `0600` under
 `${XDG_STATE_HOME:-$HOME/.local/state}/veizik/cuda/device/`, and never leaves it.
 
-**Get the `Qwen3.5-0.8B` checkpoint first**, whichever model you actually want. Activation ends with
-one short check generation that always uses `qwen35_0p8b`; without its weights, activation installs
-the lease, reports that the device is **not confirmed** (exit 6), and asks you to run it again once
-the weights are present. `veizik activate` has no `--weights`; use `VZ_WEIGHTS` or the Hugging Face
+Get the checkpoint of the model you want to run; point to it with `VZ_WEIGHTS` or the Hugging Face
 cache.
 
 ```bash

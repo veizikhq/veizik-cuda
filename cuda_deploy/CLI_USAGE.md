@@ -557,11 +557,8 @@ Give the CLI password one way only (12–128 printable ASCII characters). `--tok
 enrolment) is **not available in the shipped build** and is refused (exit 2); `--license` is no longer
 accepted. `veizik activate --help` prints this help and exits 2.
 
-Activation ends with one short check generation using `qwen35_0p8b`, so that model's weights must be
-on this machine ([`README.md`](README.md) §2, "Model weights"). Without them activation installs the lease, reports that the device is
-**not confirmed** (exit 6), and tells you to get the weights and run `veizik activate` again.
 Exit `0` activated · `2` usage / bad key, e-mail or code · `5` `--refresh` failed · `6` the service
-refused, install failed, or the check generation did not confirm the device · `130` interrupted.
+refused or install failed · `130` interrupted.
 
 ```bash
 printf '%s' "$CLI_PASSWORD" | veizik activate --key vzek_… --password-stdin
@@ -614,7 +611,7 @@ Also `--version`, `-v`, `-V`. The CLI version (1.4.3) is numbered separately fro
 | variable | effect |
 |---|---|
 | `VEIZIK_ROOT` | the engine folder the CLI uses; normally not needed (the CLI finds an engine installed with `veizik install`, and the `veizik` command from a manual `install.sh` sets it) |
-| `VZ_WEIGHTS` | where to look for model weights (`run`, `chat`, `bench`, `serve`, and the activation check) |
+| `VZ_WEIGHTS` | where to look for model weights (`run`, `chat`, `bench`, `serve`) |
 | `VEIZIK_CACHE` | the `veizik pull` cache root, searched by `run` and `serve` |
 | `HF_HUB_CACHE`, `HF_HOME` | where the Hugging Face cache lives (searched by `run` and `bench`) |
 | `VEIZIK_OUT` | default output folder for `run` and scratch folder for the CLI (else `~/veizik-out`) |

@@ -338,7 +338,6 @@ What you can do:
 | symptom | meaning | fix |
 |---|---|---|
 | `no Veizik NVIDIA engine here (<root>)` (exit 6) | the CLI cannot find the engine folder | `export VEIZIK_ROOT=<engine folder veizik install prints>` (after a manual install: `<install>/veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86`) |
-| `activation … NOT confirmed` / "model weights are not on this machine yet" (exit 6) | the lease installed but the check generation could not run | get the `Qwen3.5-0.8B` checkpoint, set `VZ_WEIGHTS`, run `veizik activate` again |
 | exit `70` `VZ_ACTIVATION_REQUIRED` | no key, no lease, or the lease expired | `veizik activate` (or `veizik activate --refresh`) |
 | exit `74` `VZ_ENTITLEMENT_REFUSED` | a lease is present but was not issued for this package on this device | `veizik activate --reapprove`; make sure the installed engine folder was not renamed |
 | exit `3`, "weights for `<model>` … not found. Looked in:" | no complete checkpoint of that model | download the full snapshot (config, tokenizer, every weight file) and use `VZ_WEIGHTS` or the Hugging Face cache (`--weights` on `serve`), or `veizik pull <model>` |
