@@ -19,7 +19,7 @@ $ veizik serve wan21_t2v_1_3b --port 8000      # render API: POST /v1/videos/gen
 ```
 
 ## Supported environment and models
-- Linux x86-64, running natively, with an NVIDIA GPU of compute capability 8.0 or newer and a driver that provides `libcuda.so.1`. No CUDA toolkit and no Python are needed. WSL is not a supported runtime for the sealed engines. One GPU runs one model.
+- Linux x86-64, running natively or under WSL2 on Windows with the current NVIDIA Windows driver, with an NVIDIA GPU of compute capability 8.0 or newer and a driver that provides `libcuda.so.1`. No CUDA toolkit and no Python are needed. One GPU runs one model.
 - GPU code ships as a separate precompiled set per architecture: `sm_80` (A100), `sm_86` (RTX 3090, RTX A5000, A40), `sm_89` (RTX 4090, L4, L40S), `sm_90a` (H100), `sm_100a` (B200), `sm_120a` (RTX 5090, RTX PRO 6000 Blackwell). A GPU architecture not in this list has no GPU code in these packages.
 - Every device is activated once (https://veizik.com/activate). The engines open their GPU code only on an activated device.
 - Model weights are not included. You download each checkpoint from its publisher, under the publisher's licence.
@@ -104,7 +104,7 @@ https://veizik.com/benchmarks — every published row names the GPU, model, mode
 - WAN provenance: every generated frame carries a v1 provenance mark — an in-pixel watermark plus XMP `DigitalSourceType=trainedAlgorithmicMedia`. The mark holds no prompt, device, path or account data.
 - Integrity: both engines check their own files at every start. A changed, added or missing file stops the run with exit code 4; reinstall from a verified package. Do not add files inside the installed or unpacked engine folder; write output elsewhere.
 - Licensing: a device runs only with a valid lease. Exit 70 means activation is required (`veizik activate`); exit 74 means the lease present was not issued for this package on this device, or does not enable what was asked.
-- Not supported: Windows, macOS, WSL, GPUs below compute capability 8.0, and splitting one model across several GPUs. The Qwen package also contains an aarch64 `veizik` binary, but the engine is x86-64 only.
+- Not supported: Windows, macOS, GPUs below compute capability 8.0, and splitting one model across several GPUs. The Qwen package also contains an aarch64 `veizik` binary, but the engine is x86-64 only.
 - Troubleshooting: `veizik doctor` · `veizik status` · [`cuda_deploy/USAGE_GUIDE.md`](cuda_deploy/USAGE_GUIDE.md) §6 · [`cuda_deploy/wan/README.md`](cuda_deploy/wan/README.md) · https://veizik.com/docs · Issues in this repository · support@veizik.com
 - Licence: personal, educational, research and evaluation use at no charge; commercial use needs a separate licence; publishing benchmarks is explicitly allowed. See [LICENSE](LICENSE), [NOTICE.md](NOTICE.md) and the Veizik Terms of Service (https://veizik.com/terms). Model weights stay under their publisher's licence. Veizik is a brand of LinkPick, Seoul.
 
