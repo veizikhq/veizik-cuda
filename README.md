@@ -1,5 +1,10 @@
 # veizik-cuda
 
+![release](https://img.shields.io/badge/release-qwen_1.1.4_and_wan_1.2.92-1f6feb)
+![platform](https://img.shields.io/badge/platform-Linux_x86--64_NVIDIA_sm__80--sm__120a-444)
+![dependencies](https://img.shields.io/badge/dependencies-NVIDIA_driver_only-2ea043)
+![licence](https://img.shields.io/badge/licence-free_for_personal_and_eval-informational)
+
 **Run language, video and image models on your own NVIDIA GPU with one native engine.**
 Veizik runs Qwen3.5 / Qwen3.6 language models and Wan2.1 / Wan2.2 video models on Linux with an NVIDIA GPU. It reads the Hugging Face checkpoint you downloaded yourself. No Python, no framework, no CUDA toolkit, no cloud at inference time: only the NVIDIA driver. Prompts, generated text and generated frames stay on the machine.
 
@@ -38,7 +43,16 @@ $ veizik serve wan21_t2v_1_3b --port 8000      # render API: POST /v1/videos/gen
   <a href="https://veizik.com/gallery"><img src="https://veizik.com/media/wan_i2v/landscape_quality.webp" width="32%" alt="AI-generated image-to-video still of a landscape, Wan2.2-I2V-A14B on an RTX 3090."></a>
 </p>
 
-<p align="center"><sub>Image-to-video, generated on the shipped <b>veizik-wan 1.2.92</b> — Wan2.2-I2V-A14B (distilled Lightning), RTX 3090, 832×480 · 81 frames · ~5 s each. Stills shown here; <b><a href="https://veizik.com/gallery">watch the clips at veizik.com/gallery</a></b>. Warm end-to-end pipeline wall time on the RTX 3090: <b>226 s</b> quality · <b>201 s</b> balanced · <b>158 s</b> ultrafast (five runs each). Every frame is AI-generated and carries a v1 provenance mark. Powered by Wan-AI / Alibaba (Wan2.2, Apache-2.0).</sub></p>
+<p align="center"><sub>Image-to-video, generated on the shipped <b>veizik-wan 1.2.92</b> — Wan2.2-I2V-A14B (distilled Lightning), RTX 3090, 832×480 · 81 frames · ~5 s each. Stills shown here; <b><a href="https://veizik.com/gallery">watch the clips at veizik.com/gallery</a></b>. Every frame is AI-generated and carries a v1 provenance mark. Powered by Wan-AI / Alibaba (Wan2.2, Apache-2.0).</sub></p>
+
+**Reproduce it** — bring your own first-frame image, an activated device, and the Wan2.2-I2V-A14B weights:
+
+```bash
+veizik run wan22_i2v_a14b "a bird takes off from a branch" \
+  --image first_frame.png --out ./clip --mode quality
+# 832×480 · 81 frames written to ./clip/frames/ · warm pipeline wall time on an RTX 3090:
+# ~226 s quality · ~201 s balanced · ~158 s ultrafast (five runs each)
+```
 
 ## Supported environment and models
 - Linux x86-64, running natively or under WSL2 on Windows with the current NVIDIA Windows driver, with an NVIDIA GPU of compute capability 8.0 or newer and a driver that provides `libcuda.so.1`. No CUDA toolkit and no Python are needed. One GPU runs one model.
@@ -56,7 +70,10 @@ $ veizik serve wan21_t2v_1_3b --port 8000      # render API: POST /v1/videos/gen
 | `qwen35_9b` | Qwen3.5-9B | `Qwen/Qwen3.5-9B` | yes | — | ≈ 8.7 GiB |
 | `qwen36_35b_a3b` | Qwen3.6-35B-A3B (mixture of experts, about 3B active per token) | `Qwen/Qwen3.6-35B-A3B` | yes | yes — `--image` / `--video` | ≈ 21.7 GiB (text) |
 
-All five models are marked EXPERIMENTAL in the signed model catalogue. Memory is measured after load with text input on an RTX 5090, on the 1.0.0 build; long prompts, images, video and serving need more. Image and video input is an option of the package's launcher for Qwen3.6-35B-A3B only: one PNG or JPEG image, or one folder of 2–256 PNG or JPEG frames, per run, together with a text prompt. The image and video stage ships GPU code for `sm_86`, `sm_89` and `sm_120a`. On a GPU the image and video stage does not support, the run is refused cleanly with code 50 (`the image stage refused this request (status 50)`) before any image or video work. Validation ran on RTX 3090, RTX A5000, RTX 4090 and RTX 5090; the `sm_80`, `sm_90a` and `sm_100a` GPU code is included but was not run in validation.
+- All five models are marked **EXPERIMENTAL** in the signed model catalogue.
+- Resident memory is measured after load with text input on an RTX 5090 (1.0.0 build); long prompts, images, video and serving need more.
+- **Image / video input is Qwen3.6-35B-A3B only** — one PNG or JPEG image, or one folder of 2–256 frames, per run, with a text prompt. Its stage ships GPU code for `sm_86`, `sm_89`, `sm_120a`; on any other GPU the run is refused cleanly with code 50 before any image or video work.
+- Validation ran on RTX 3090, A5000, 4090 and 5090; the `sm_80`, `sm_90a` and `sm_100a` GPU code is included but was not run in validation.
 
 **Video — veizik-wan 1.2.92** (4 models in one package, with a resident render server and mid-render preempt)
 
@@ -93,6 +110,9 @@ veizik ps                             # resident servers running here
 veizik stop 8000                      # stop the server on a port (or: veizik stop all)
 veizik uninstall qwen36               # removes an installed package (alias: veizik rm)
 ```
+<details>
+<summary><b>Command vocabulary, flags, and per-model notes</b> (click to expand)</summary>
+
 - Every model answers the same commands: `run`, `chat`, `serve`, `ps`, `stop`, `models`, `list`, `install`, `update`, `uninstall` / `rm`, `pull`, `hf`, `remove`, `convert`, `inspect`, `bench`, `cache`, `config`, `completion`, `status`, `activate`, `devices`, `device-id`, `doctor` and `version`; `veizik <command> --help` gives the detail and [`cuda_deploy/CLI_USAGE.md`](cuda_deploy/CLI_USAGE.md) is the full reference. `veizik update` and `veizik convert` exist but are not functional yet.
 - Install names are keywords: the Qwen package is `qwen`, `qwen35`, `qwen36` or any of its model keys (`qwen35_0p8b`, `qwen35_2b`, `qwen35_4b`, `qwen35_9b`, `qwen36_35b_a3b`); the WAN package is `wan`, `wan21`, `wan22` or any of its model keys (`wan21_t2v_1_3b`, `wan21_t2v_14b`, `wan22_t2v_a14b`, `wan22_i2v_a14b`). Case does not matter, and `.` or `-` may stand for `_`.
 - `veizik install` downloads the package anonymously from this repository's release, refuses it if its sha256 differs from the published release digest, and installs it to `${XDG_STATE_HOME:-~/.local/state}/veizik/engines/<model>/`. It refuses to run on macOS. `veizik run`, `veizik chat` and `veizik serve` find the installed engine themselves.
@@ -102,6 +122,8 @@ veizik uninstall qwen36               # removes an installed package (alias: vei
 - Qwen image and video input (Qwen3.6-35B-A3B only): `veizik run qwen36_35b_a3b "What is in this picture?" --image photo.png` (photo.png: any PNG or JPEG of yours), or `--video ./frames` (a folder of frames) with `--video-fps`.
 - WAN: frames land in `<run folder>/frames/`. `veizik serve` answers with the same frames through the HTTP render API; see [`cuda_deploy/wan/README.md`](cuda_deploy/wan/README.md).
 - WAN activation: one `veizik activate` approval covers every installed model, WAN included. Without activation every WAN GPU stage stops before any compute and the run exits 70 (`VZ_ACTIVATION_REQUIRED`). WAN needs a 16-channel video-decoder (VAE) layout prepared from your WAN2.1/2.2 checkpoint: `veizik pull wan22` prepares it automatically after fetching the weights (idempotent and crash-safe), and `veizik pull --prep-local DIR` prepares weights already on disk. Standard WAN2.1 (1.3B / 14B) needs no manual step.
+
+</details>
 
 ### Checksums (published release digests)
 `veizik install` downloads each package and verifies it against its published release digest automatically — there is no separate manual install step. For reference (e.g. to verify a direct download), the published downloads and digests are:
@@ -132,6 +154,9 @@ https://veizik.com/benchmarks — every published row names the GPU, model, mode
 
 ## Package contents
 
+<details>
+<summary>File-by-file manifest of both packages (click to expand)</summary>
+
 **veizik-qwen-cuda-1.1.4-linux-x86_64.vzpack** (v1.1.4, sha256 `0d925ad9…`, 56,694,883 B)
 A single-file `.vzpack` (content-addressed, with a signed `.vzindex`) that `veizik install qwen36` verifies against the published digest and materializes to the engine folder `veizik-qwen-cuda-0.1.0-rc1-linux-x86_64-sm86/`: README.txt 1,927 B · install.sh 12,866 B · SHA256SUMS 207,093 B · veizik-x86_64 1,927,696 B · veizik-aarch64 1,242,696 B · PTXSEAL.prov 124 B · PTXSEAL.prov.sig 64 B · the sealed engine folder of the same name: INTERFACE.json 10,540 B · PIPELINE.sh 108 B · SHA256SUMS.vz 132,541 B · models.json 644 B · models.json.sig 64 B · bin/ (8 files, including the image and video runners) · models/ (5 model folders, per-model metadata) · GPU code, 251 files per architecture: `ptx/` (sm_80) · `ptx_sm86/` · `ptx_sm89/` · `ptx_sm90a/` · `ptx_sm100a/` · `ptx_sm120a/` · image and video stage GPU code, 16 files per architecture: `ptx_vis_sm86/` · `ptx_vis_sm89/` · `ptx_vis_sm120a/`. 1,583 files in all. Verify with `sha256sum -c SHA256SUMS` inside the top folder.
 
@@ -140,3 +165,5 @@ A single-file `.vzpack` (content-addressed, signed `.vzindex`, shared-core `veiz
 
 **Engine folder** (materialized from the `.vzpack` by `veizik install wan22`)
 PTXSEAL.prov 124 B · PTXSEAL.prov.sig 64 B · folder `veizik-wan-1.2.0-linux-x86_64/`: veizik 4,329 B · PIPELINE.sh 48,537 B · README.txt 8,307 B · MODEL.txt 418 B · STAGES.txt 1,239 B · INTERFACE.json 22,444 B · manifest.json 416 B · CONFORMANCE.json 4,099 B · REPRO.md 670 B · PROVENANCE.txt 483 B · THIRD_PARTY_NOTICES.txt 1,070 B · SHA256SUMS.vz 14,702 B · inject.sh 3,390 B · s6_segments.sh 998 B · vz_modes.conf 312 B · bin/ (13 files, incl. the new `veizik-resident` resident host-loop) · bin_seam/ (1 file) · lib/ (15 libraries) · models/ (model folders) · GPU kernel sets: `ptx/` 18 · `ptx_89/` 18 · `ptx_a80/` 19 · `ptx_h90/` 23 · `ptx_b100a/` 21 · `ptx_b120/` 18 files. 177 files in all. The 1.2.92 engine is the Wan 2.2 i2v Lightning LoRA forward-correction (fused int8 mma, `lib/libvzwan.so`) and each of the six GPU kernel sets gains one new LoRA kernel; the opener, `bin/wan_s2` (the 1.2.4 CUDA-13.x non-root fix) and every other kernel are byte-identical to 1.2.8. The folder keeps the version-stable name `veizik-wan-1.2.0-linux-x86_64` so `veizik activate` resolves the same release id across versions. Verify with `bin/vzseal <folder>` (prints `VZSEAL OK 175`).
+
+</details>
