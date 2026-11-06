@@ -3,6 +3,14 @@
 **Run language, video and image models on your own NVIDIA GPU with one native engine.**
 Veizik runs Qwen3.5 / Qwen3.6 language models and Wan2.1 / Wan2.2 video models on Linux with an NVIDIA GPU. It reads the Hugging Face checkpoint you downloaded yourself. No Python, no framework, no CUDA toolkit, no cloud at inference time: only the NVIDIA driver. Prompts, generated text and generated frames stay on the machine.
 
+### At a glance
+- **One native engine, no stack.** No Python, no PyTorch/diffusers, no CUDA toolkit — only the NVIDIA driver. The engine is built from scratch in Veizik's own language and ships as a sealed, checksummed package.
+- **Your own weights.** Bring the Hugging Face checkpoint you downloaded; nothing is uploaded and nothing is written back to it. Prompts, generated text and generated frames stay on the machine.
+- **Language + video from one toolchain.** Qwen3.5/3.6 (chat, OpenAI-compatible `serve`, and image/video *input* on 35B-A3B) and Wan2.1/2.2 text-to-video and image-to-video — the same `run` / `chat` / `serve` commands for every model.
+- **Fits a consumer card.** A 35B-A3B mixture-of-experts language model runs resident in ≈21.7 GiB, and a 14B video model renders 720p on a 24 GB card — weights stream to the GPU instead of loading into system RAM.
+- **Built for a render queue.** `serve` is a resident render server: the model loads once, requests reuse it with no reload, an urgent request preempts a running render at a step boundary (checkpoint, serve, resume) and the result is bit-identical to a one-shot run.
+- **Deterministic and resumable.** Greedy decode is reproducible; a WAN render resumes bit-identically after an interruption; `--det-vae yes` gives byte-exact frames. Every engine verifies its own files at each start.
+
 ## Who this is for
 Developers and teams who run open models on their own NVIDIA hardware and want a sealed native engine instead of a framework stack: a one-shot `run`, an interactive `chat`, or a local HTTP server (`serve`) — an OpenAI-compatible API for language models and a render API for video — with the same commands for every model.
 
@@ -17,6 +25,20 @@ $ veizik run wan21_t2v_1_3b "A red car driving along a coastal road at sunset." 
 $ ls $HOME/clip/frames      # frame_00000.png ...
 $ veizik serve wan21_t2v_1_3b --port 8000      # render API: POST /v1/videos/generations
 ```
+
+## Generated on this engine
+
+<p align="center">
+  <a href="https://veizik.com/gallery"><img src="https://veizik.com/media/wan_i2v/bird_quality.webp" width="32%" alt="AI-generated image-to-video still of a bird, Wan2.2-I2V-A14B on an RTX 3090."></a>
+  <a href="https://veizik.com/gallery"><img src="https://veizik.com/media/wan_i2v/cat_quality.webp" width="32%" alt="AI-generated image-to-video still of a cat, Wan2.2-I2V-A14B on an RTX 3090."></a>
+  <a href="https://veizik.com/gallery"><img src="https://veizik.com/media/wan_i2v/astro_quality.webp" width="32%" alt="AI-generated image-to-video still of an astronaut, Wan2.2-I2V-A14B on an RTX 3090."></a>
+</p>
+<p align="center">
+  <a href="https://veizik.com/gallery"><img src="https://veizik.com/media/wan_i2v/guitar_quality.webp" width="32%" alt="AI-generated image-to-video still with a guitar, Wan2.2-I2V-A14B on an RTX 3090."></a>
+  <a href="https://veizik.com/gallery"><img src="https://veizik.com/media/wan_i2v/landscape_quality.webp" width="32%" alt="AI-generated image-to-video still of a landscape, Wan2.2-I2V-A14B on an RTX 3090."></a>
+</p>
+
+<p align="center"><sub>Image-to-video, generated on the shipped <b>veizik-wan 1.2.92</b> — Wan2.2-I2V-A14B (distilled Lightning), RTX 3090, 832×480 · 81 frames · ~5 s each. Stills shown here; <b><a href="https://veizik.com/gallery">watch the clips at veizik.com/gallery</a></b>. Warm end-to-end pipeline wall time on the RTX 3090: <b>226 s</b> quality · <b>201 s</b> balanced · <b>158 s</b> ultrafast (five runs each). Every frame is AI-generated and carries a v1 provenance mark. Powered by Wan-AI / Alibaba (Wan2.2, Apache-2.0).</sub></p>
 
 ## Supported environment and models
 - Linux x86-64, running natively or under WSL2 on Windows with the current NVIDIA Windows driver, with an NVIDIA GPU of compute capability 8.0 or newer and a driver that provides `libcuda.so.1`. No CUDA toolkit and no Python are needed. One GPU runs one model.
