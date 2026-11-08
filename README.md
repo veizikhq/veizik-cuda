@@ -111,7 +111,7 @@ export PATH="$HOME/.local/bin:$PATH"
 veizik list                           # model engines: installed and available
 veizik install qwen36                 # Qwen package (release v1.1.4)
 veizik install wan22                  # WAN package (release v1.2.92)
-veizik install sd35                   # SD3.5 package (release v1.0.0)
+veizik install sd35                   # SD3.5 package (release v1.0.1)
 veizik install flux                   # FLUX.1 image package (release v1.0.5)
 veizik activate                       # opens veizik.com/activate — approve this machine once
 #   no browser (SSH, servers)? create a key under "Browser-free activation" and a password under "CLI password"
@@ -147,7 +147,7 @@ veizik uninstall qwen36               # removes an installed package (alias: vei
 - `veizik-qwen-cuda-1.1.4-linux-x86_64.vzpack` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.1.4/veizik-qwen-cuda-1.1.4-linux-x86_64.vzpack — sha256 `0d925ad92f450e833367834924e4d5d078edab7c546499e214f17b476a930f5e`
 - `veizik-shared-core.vzroot` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.1.4/veizik-shared-core.vzroot — sha256 `829f853b945dd6fe403a3c63378fb76ffe5459a65296718d22b0483c4c1db51c`
 - `veizik-wan-1.2.92-linux-x86_64.vzpack` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.2.92/veizik-wan-1.2.92-linux-x86_64.vzpack — sha256 `940318320e2e6dc59295f0acebf62c56830ad732df158a6b74859a36bc5c7249`
-- `veizik-sd35-1.0.0-linux-x86_64.vzpack` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.0.0/veizik-sd35-1.0.0-linux-x86_64.vzpack — sha256 `cbc273133f6c563e0736984f196496dfb3b00a5953c06a196a6cfb59b7457c6f`
+- `veizik-sd35-1.0.1-linux-x86_64.vzpack` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.0.1/veizik-sd35-1.0.1-linux-x86_64.vzpack — sha256 `81a6629d8aa26cde50b2c934509be28b11df11f890e50a88528572a27141fcde`
 - `veizik-flux-1.0.5-linux-x86_64.vzpack` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.0.5/veizik-flux-1.0.5-linux-x86_64.vzpack — sha256 `33921b9c0d6690fff86f53be87583cc1c02ad5ddacfa4af4b2e06b350da1a62a`
 
 What needs the network: installing a package, creating the account, activating the device and renewing its lease. Generation itself does not.
