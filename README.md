@@ -1,6 +1,6 @@
 # veizik-cuda
 
-![release](https://img.shields.io/badge/release-flux_1.0.5_sd35_1.0.0_qwen_1.1.4_wan_1.2.92-1f6feb)
+![release](https://img.shields.io/badge/release-flux_1.0.5_sd35_1.0.1_qwen_1.1.4_wan_1.2.92-1f6feb)
 ![platform](https://img.shields.io/badge/platform-Linux_x86--64_NVIDIA_sm__80--sm__120a-444)
 ![dependencies](https://img.shields.io/badge/dependencies-NVIDIA_driver_only-2ea043)
 ![licence](https://img.shields.io/badge/licence-free_for_personal_and_eval-informational)
