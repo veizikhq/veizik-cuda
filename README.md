@@ -1,6 +1,6 @@
 # veizik-cuda
 
-![release](https://img.shields.io/badge/release-flux_1.0.5_sd35_1.0.1_qwen_1.1.4_wan_1.2.93-1f6feb)
+![release](https://img.shields.io/badge/release-flux_1.0.6_sd35_1.0.1_qwen_1.1.4_wan_1.2.93-1f6feb)
 ![platform](https://img.shields.io/badge/platform-Linux_x86--64_NVIDIA_sm__80--sm__120a-444)
 ![dependencies](https://img.shields.io/badge/dependencies-NVIDIA_driver_only-2ea043)
 ![licence](https://img.shields.io/badge/licence-free_for_personal_and_eval-informational)
@@ -87,7 +87,7 @@ veizik run wan22_i2v_a14b "a bird takes off from a branch" \
 The WAN package carries six kernel sets, one per architecture: `sm_80`, `sm_86`, `sm_89`, `sm_90a`, `sm_100a` and `sm_120a`. Every speed figure Veizik states for this bundle was measured on an RTX 3090 (`sm_86`) only; other GPUs run their own kernel sets at speeds not measured.
 
 
-**Image — veizik-flux 1.0.5** (8 FLUX.1 [dev] pipelines in one package)
+**Image — veizik-flux 1.0.6** (8 FLUX.1 [dev] pipelines in one package)
 
 | Model key | Model | Hugging Face checkpoint | Task |
 |---|---|---|---|
@@ -112,7 +112,7 @@ veizik list                           # model engines: installed and available
 veizik install qwen36                 # Qwen package (release v1.1.4)
 veizik install wan22                  # WAN package (release v1.2.93)
 veizik install sd35                   # SD3.5 package (release v1.0.1)
-veizik install flux                   # FLUX.1 image package (release v1.0.5)
+veizik install flux                   # FLUX.1 image package (release v1.0.6)
 veizik activate                       # opens veizik.com/activate — approve this machine once
 #   no browser (SSH, servers)? create a key under "Browser-free activation" and a password under "CLI password"
 #   on your account page, then:  veizik activate --key vzek_… --password-stdin < pwfile
@@ -148,7 +148,7 @@ veizik uninstall qwen36               # removes an installed package (alias: vei
 - `veizik-shared-core.vzroot` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.1.4/veizik-shared-core.vzroot — sha256 `829f853b945dd6fe403a3c63378fb76ffe5459a65296718d22b0483c4c1db51c`
 - `veizik-wan-1.2.93-linux-x86_64.vzpack` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.2.93/veizik-wan-1.2.93-linux-x86_64.vzpack — sha256 `c35b003d8a0a493b5b79904dd28bd1b793293061383fe6de3c498435dc5c6087`
 - `veizik-sd35-1.0.1-linux-x86_64.vzpack` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.0.1/veizik-sd35-1.0.1-linux-x86_64.vzpack — sha256 `81a6629d8aa26cde50b2c934509be28b11df11f890e50a88528572a27141fcde`
-- `veizik-flux-1.0.5-linux-x86_64.vzpack` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.0.5/veizik-flux-1.0.5-linux-x86_64.vzpack — sha256 `33921b9c0d6690fff86f53be87583cc1c02ad5ddacfa4af4b2e06b350da1a62a`
+- `veizik-flux-1.0.6-linux-x86_64.vzpack` — https://github.com/veizikhq/veizik-cuda/releases/download/v1.0.6/veizik-flux-1.0.6-linux-x86_64.vzpack — sha256 `dde1a418b6eda86eba04fbb5ea14a40f6db2cac0129e3ed296a395328a67e418`
 
 What needs the network: installing a package, creating the account, activating the device and renewing its lease. Generation itself does not.
 
