@@ -100,7 +100,7 @@ The WAN package carries six kernel sets, one per architecture: `sm_80`, `sm_86`,
 | `fluxkontext` | FLUX.1 Kontext [dev] | `black-forest-labs/FLUX.1-Kontext-dev` | image editing |
 | `fluxredux` | FLUX.1 Redux [dev] | `black-forest-labs/FLUX.1-Redux-dev` | image variation |
 
-The FLUX package ships per-architecture GPU code like the others (`sm_80` … `sm_120a`). Text-to-image uses `--steps` / `--seed` / `--mode`; the conditioned pipelines take `--image` (and `--mask` for Fill). Every generated PNG carries a v1 provenance mark (XMP `DigitalSourceType=trainedAlgorithmicMedia`). Weights are the public Black Forest Labs checkpoints you download yourself, under their licence.
+The FLUX package ships per-architecture GPU code like the others (`sm_80` … `sm_120a`). Text-to-image uses `--steps` / `--seed`; the conditioned pipelines take `--image` (and `--mask` for Fill). Every generated PNG carries a v1 provenance mark (XMP `DigitalSourceType=trainedAlgorithmicMedia`). FLUX weights are the public Black Forest Labs checkpoints you download yourself from Hugging Face — accept the FLUX.1 [dev] licence at Black Forest Labs for the gated variants, then `veizik hf login` — and supply them with `--weights DIR` (the full Hugging Face repo folder), `VZ_WEIGHTS`, or the Hugging Face cache; FLUX does not fetch through `veizik pull`. Sign in at veizik.com and run `veizik activate` (approve in that same signed-in browser) once before running.
 
 ## Install and first run
 Step 1 installs the `veizik` command (the latest release); it then installs the packages. On macOS the script points you to the Apple disk image instead.
